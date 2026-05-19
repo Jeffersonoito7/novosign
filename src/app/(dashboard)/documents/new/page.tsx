@@ -1,0 +1,362 @@
+'use client'
+
+import { useState, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
+import { useDropzone } from 'react-dropzone'
+import { Upload, FileText, X, Plus, Trash2 } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
+import type { NotificationChannel } from '@/types'
+
+interface SignatoryInput {
+  name: string
+  email: string
+  phone: string
+  cpf: string
+  notification_channel: NotificationChannel
+}
+
+export default function NewDocumentPage() {
+  const router = useRouter()
+  const [step, setStep] = useState<'upload' | 'signatories' | 'review'>('upload')
+  const [file, setFile] = useState<File | null>(null)
+  const [title, setTitle] = useState('')
+  const [message, setMessage] = useState('')
+  const [signatories, setSignatories] = useState<SignatoryInput[]>([
+    { name: '', email: '', phone: '', cpf: '', notification_channel: 'email' },
+  ])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const onDrop = useCallback((accepted: File[]) => {
+    const f = accepted[0]
+    if (f) {
+      setFile(f)
+      if (!title) setTitle(f.name.replace(/\.[^/.]+$/, ''))
+    }
+  }, [title])
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: { 'application/pdf': ['.pdf'] },
+    maxFiles: 1,
+    maxSize: 20 * 1024 * 1024,
+  })
+
+  function addSignatory() {
+    setSignatories(prev => [...prev, { name: '', email: '', phone: '', cpf: '', notification_channel: 'email' }])
+  }
+
+  function removeSignatory(i: number) {
+    setSignatories(prev => prev.filter((_, idx) => idx !== i))
+  }
+
+  function updateSignatory(i: number, field: keyof SignatoryInput, value: string) {
+    setSignatories(prev => prev.map((s, idx) => idx === i ? { ...s, [field]: value } : s))
+  }
+
+  async function handleSubmit() {
+    setLoading(true)
+    setError('')
+
+    try {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Não autenticado')
+
+      const { data: profile } = await supabase.from('users').select('company_id').eq('id', user.id).single()
+      if (!profile) throw new Error('Perfil não encontrado')
+
+      // Calcular hash SHA-256 do arquivo
+      const arrayBuffer = await file!.arrayBuffer()
+      const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer)
+      const hashArray = Array.from(new Uint8Array(hashBuffer))
+      const fileHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+
+      // Upload do arquivo no Supabase Storage
+      const fileName = `${profile.company_id}/${Date.now()}_${file!.name}`
+      const { error: uploadError } = await supabase.storage
+        .from('documents')
+        .upload(fileName, file!)
+
+      if (uploadError) throw new Error('Erro ao fazer upload do arquivo.')
+
+      // Criar documento
+      const { data: doc, error: docError } = await supabase
+        .from('documents')
+        .insert({
+          company_id: profile.company_id,
+          title,
+          message: message || null,
+          file_path: fileName,
+          file_hash: fileHash,
+          created_by: user.id,
+          status: 'draft',
+        })
+        .select()
+        .single()
+
+      if (docError || !doc) throw new Error('Erro ao criar documento.')
+
+      // Criar signatários
+      const sigInserts = signatories.map((s, i) => ({
+        document_id: doc.id,
+        name: s.name,
+        email: s.email,
+        phone: s.phone || null,
+        cpf: s.cpf || null,
+        sign_order: i + 1,
+        notification_channel: s.notification_channel,
+      }))
+
+      const { error: sigError } = await supabase.from('signatories').insert(sigInserts)
+      if (sigError) throw new Error('Erro ao adicionar signatários.')
+
+      // Evento de auditoria
+      await supabase.from('audit_events').insert({
+        document_id: doc.id,
+        event_type: 'document_created',
+        metadata: { created_by: user.id },
+      })
+
+      router.push(`/dashboard/documents/${doc.id}`)
+    } catch (err: any) {
+      setError(err.message ?? 'Erro inesperado.')
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="p-8 max-w-3xl mx-auto">
+      <h1 className="text-2xl font-bold text-gray-900 mb-2">Novo Documento</h1>
+      <p className="text-gray-500 text-sm mb-8">Faça upload do PDF e defina quem precisa assinar.</p>
+
+      {/* Steps */}
+      <div className="flex items-center gap-2 mb-8">
+        {(['upload', 'signatories', 'review'] as const).map((s, i) => {
+          const labels = { upload: 'Documento', signatories: 'Signatários', review: 'Revisar' }
+          const active = step === s
+          const done = ['upload', 'signatories', 'review'].indexOf(step) > i
+          return (
+            <div key={s} className="flex items-center gap-2">
+              {i > 0 && <div className={`h-px w-8 ${done || active ? 'bg-blue-400' : 'bg-gray-200'}`} />}
+              <div className={`flex items-center gap-2 text-sm font-medium ${active ? 'text-blue-600' : done ? 'text-green-600' : 'text-gray-400'}`}>
+                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${active ? 'bg-blue-600 text-white' : done ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500'}`}>
+                  {done ? '✓' : i + 1}
+                </span>
+                {labels[s]}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Step 1: Upload */}
+      {step === 'upload' && (
+        <div className="space-y-5">
+          <div
+            {...getRootProps()}
+            className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-colors ${isDragActive ? 'border-blue-400 bg-blue-50' : file ? 'border-green-400 bg-green-50' : 'border-gray-300 hover:border-gray-400'}`}
+          >
+            <input {...getInputProps()} />
+            {file ? (
+              <div>
+                <FileText size={32} className="text-green-500 mx-auto mb-2" />
+                <p className="font-medium text-green-700">{file.name}</p>
+                <p className="text-sm text-green-600">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+              </div>
+            ) : (
+              <div>
+                <Upload size={32} className="text-gray-300 mx-auto mb-2" />
+                <p className="font-medium text-gray-600">Arraste o PDF aqui ou clique para selecionar</p>
+                <p className="text-sm text-gray-400 mt-1">PDF até 20MB</p>
+              </div>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Título do documento</label>
+            <input
+              required
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Ex: Contrato de Prestação de Serviços"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Mensagem para os signatários <span className="text-gray-400">(opcional)</span></label>
+            <textarea
+              value={message}
+              onChange={e => setMessage(e.target.value)}
+              rows={3}
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              placeholder="Olá! Por favor, assine o documento abaixo..."
+            />
+          </div>
+
+          <button
+            disabled={!file || !title}
+            onClick={() => setStep('signatories')}
+            className="w-full bg-blue-600 text-white py-2.5 rounded-lg font-medium text-sm hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            Próximo: Definir Signatários
+          </button>
+        </div>
+      )}
+
+      {/* Step 2: Signatários */}
+      {step === 'signatories' && (
+        <div className="space-y-4">
+          {signatories.map((sig, i) => (
+            <div key={i} className="bg-white border border-gray-200 rounded-xl p-5">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-semibold text-gray-900">Signatário {i + 1}</h3>
+                {signatories.length > 1 && (
+                  <button onClick={() => removeSignatory(i)} className="text-red-400 hover:text-red-600">
+                    <Trash2 size={16} />
+                  </button>
+                )}
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="col-span-2">
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Nome completo</label>
+                  <input
+                    required
+                    value={sig.name}
+                    onChange={e => updateSignatory(i, 'name', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="João da Silva"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">E-mail</label>
+                  <input
+                    type="email"
+                    required
+                    value={sig.email}
+                    onChange={e => updateSignatory(i, 'email', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="joao@email.com"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">CPF <span className="text-gray-400">(opcional)</span></label>
+                  <input
+                    value={sig.cpf}
+                    onChange={e => updateSignatory(i, 'cpf', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="000.000.000-00"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Telefone / WhatsApp <span className="text-gray-400">(opcional)</span></label>
+                  <input
+                    value={sig.phone}
+                    onChange={e => updateSignatory(i, 'phone', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="(87) 99999-9999"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Canal de notificação</label>
+                  <select
+                    value={sig.notification_channel}
+                    onChange={e => updateSignatory(i, 'notification_channel', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="email">E-mail</option>
+                    <option value="whatsapp">WhatsApp</option>
+                    <option value="sms">SMS</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          ))}
+
+          <button
+            onClick={addSignatory}
+            className="w-full border border-dashed border-gray-300 text-gray-500 py-2.5 rounded-xl text-sm hover:border-blue-400 hover:text-blue-600 transition-colors flex items-center justify-center gap-2"
+          >
+            <Plus size={16} /> Adicionar signatário
+          </button>
+
+          {error && <div className="bg-red-50 text-red-600 text-sm px-3 py-2 rounded-lg">{error}</div>}
+
+          <div className="flex gap-3 pt-2">
+            <button
+              onClick={() => setStep('upload')}
+              className="flex-1 border border-gray-300 text-gray-700 py-2.5 rounded-lg font-medium text-sm hover:bg-gray-50 transition-colors"
+            >
+              Voltar
+            </button>
+            <button
+              onClick={() => setStep('review')}
+              disabled={signatories.some(s => !s.name || !s.email)}
+              className="flex-1 bg-blue-600 text-white py-2.5 rounded-lg font-medium text-sm hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              Revisar
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Step 3: Revisão */}
+      {step === 'review' && (
+        <div className="space-y-5">
+          <div className="bg-white border border-gray-200 rounded-xl p-5">
+            <h3 className="text-sm font-semibold text-gray-700 mb-3">Documento</h3>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                <FileText size={18} className="text-blue-600" />
+              </div>
+              <div>
+                <p className="font-medium text-gray-900">{title}</p>
+                <p className="text-sm text-gray-400">{file?.name} · {(file!.size / 1024 / 1024).toFixed(2)} MB</p>
+              </div>
+            </div>
+            {message && (
+              <div className="mt-3 bg-gray-50 rounded-lg px-3 py-2 text-sm text-gray-600">
+                {message}
+              </div>
+            )}
+          </div>
+
+          <div className="bg-white border border-gray-200 rounded-xl p-5">
+            <h3 className="text-sm font-semibold text-gray-700 mb-3">{signatories.length} Signatário(s)</h3>
+            <div className="space-y-2">
+              {signatories.map((s, i) => (
+                <div key={i} className="flex items-center gap-3 text-sm">
+                  <div className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-xs font-bold text-gray-500">{i + 1}</div>
+                  <div>
+                    <span className="font-medium text-gray-900">{s.name}</span>
+                    <span className="text-gray-400 ml-2">{s.email}</span>
+                  </div>
+                  <span className="ml-auto text-xs text-gray-400 capitalize">{s.notification_channel}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {error && <div className="bg-red-50 text-red-600 text-sm px-3 py-2 rounded-lg">{error}</div>}
+
+          <div className="flex gap-3">
+            <button
+              onClick={() => setStep('signatories')}
+              className="flex-1 border border-gray-300 text-gray-700 py-2.5 rounded-lg font-medium text-sm hover:bg-gray-50 transition-colors"
+            >
+              Voltar
+            </button>
+            <button
+              onClick={handleSubmit}
+              disabled={loading}
+              className="flex-1 bg-blue-600 text-white py-2.5 rounded-lg font-medium text-sm hover:bg-blue-700 disabled:opacity-50 transition-colors"
+            >
+              {loading ? 'Criando...' : 'Criar Documento'}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
