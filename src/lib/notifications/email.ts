@@ -69,16 +69,26 @@ export async function sendOTPEmail({
   return resend.emails.send({
     from: FROM,
     to,
-    subject: `Seu código de verificação — NovoSign`,
+    subject: `NovoSign: confirme sua identidade para assinar`,
     html: `
-      <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px">
-        <h1 style="color:#2563eb">NovoSign</h1>
-        <h2>Olá, ${signatoryName}!</h2>
-        <p>Use o código abaixo para verificar sua identidade e assinar o documento <strong>${documentTitle}</strong>:</p>
-        <div style="background:#f3f4f6;border-radius:12px;padding:32px;text-align:center;margin:24px 0">
-          <span style="font-size:48px;font-weight:bold;letter-spacing:16px;color:#111827">${code}</span>
+      <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;background:#ffffff">
+        <div style="margin-bottom:24px">
+          <span style="font-size:22px;font-weight:bold;color:#2563eb">Novo</span><span style="font-size:22px;font-weight:bold;color:#10b981">Sign</span>
         </div>
-        <p style="color:#6b7280;font-size:14px">Este código expira em 10 minutos. Não compartilhe com ninguém.</p>
+        <p style="font-size:16px;color:#111827;margin-bottom:8px">Olá, <strong>${signatoryName}</strong>!</p>
+        <p style="font-size:15px;color:#374151;margin-bottom:24px">
+          Você foi solicitado a assinar o documento <strong>"${documentTitle}"</strong>.
+          Use o código abaixo para confirmar sua identidade:
+        </p>
+        <div style="background:#f0f9ff;border:2px solid #bfdbfe;border-radius:12px;padding:28px;text-align:center;margin-bottom:24px">
+          <p style="font-size:13px;color:#1d4ed8;margin:0 0 12px 0;font-weight:600;letter-spacing:1px">CÓDIGO DE VERIFICAÇÃO</p>
+          <p style="font-size:42px;font-weight:bold;letter-spacing:12px;color:#1e3a8a;margin:0;font-family:monospace">${code}</p>
+          <p style="font-size:12px;color:#6b7280;margin:12px 0 0 0">Válido por 10 minutos</p>
+        </div>
+        <p style="font-size:13px;color:#6b7280;border-top:1px solid #e5e7eb;padding-top:16px">
+          Se você não solicitou esta assinatura, ignore este e-mail.<br>Nunca compartilhe este código.
+        </p>
+        <p style="font-size:12px;color:#9ca3af;margin-top:16px">NovoSign · Lei 14.063/2020</p>
       </div>
     `,
   })
