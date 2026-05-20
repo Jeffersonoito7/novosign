@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Sidebar from '@/components/dashboard/Sidebar'
+import RealtimeToast from '@/components/dashboard/RealtimeToast'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -24,6 +25,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <main className="flex-1 overflow-auto" style={{ color: 'var(--text-primary)' }}>
         {children}
       </main>
+      <RealtimeToast companyId={profile?.company_id ?? ''} />
     </div>
   )
 }

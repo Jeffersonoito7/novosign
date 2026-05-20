@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { FileText, Clock, CheckCircle, XCircle, Plus } from 'lucide-react'
 import Link from 'next/link'
 import { documentStatusLabel, formatDate } from '@/lib/utils'
+import OnboardingModal from '@/components/dashboard/OnboardingModal'
 
 async function getStats(companyId: string) {
   const supabase = await createClient()
@@ -40,6 +41,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="p-8">
+      <OnboardingModal />
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Dashboard</h1>
