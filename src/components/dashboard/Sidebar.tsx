@@ -37,15 +37,10 @@ export default function Sidebar({ user, credits }: { user: any; credits: number 
       {/* Logo */}
       <div className="px-4 py-3 border-b" style={{ borderColor: 'var(--border)' }}>
         <div className="flex items-center gap-2.5">
-          <Image src="/logo.svg" alt="NovoSign" width={36} height={36} />
-          <div>
-            <h1 className="text-lg font-bold leading-none" style={{ color: 'var(--blue-primary)' }}>
-              NovoSign
-            </h1>
-            <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--text-muted)' }}>
-              {user?.companies?.name ?? 'Minha Empresa'}
-            </p>
-          </div>
+          <Image src="/novosign.png" alt="NovoSign" width={110} height={40} style={{ objectFit: 'contain' }} />
+          <p className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>
+            {user?.companies?.name ?? 'Minha Empresa'}
+          </p>
         </div>
       </div>
 

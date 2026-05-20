@@ -388,8 +388,7 @@ function SignLayout({ children, wide }: { children: React.ReactNode; wide?: bool
       <header className="border-b px-6 py-3 flex items-center gap-3"
         style={{ background: 'var(--bg-card)', borderColor: 'var(--border)' }}>
         <div className="flex items-center gap-2.5">
-          <Image src="/logo.svg" alt="NovoSign" width={28} height={28} />
-          <h1 className="text-base font-bold" style={{ color: 'var(--blue-primary)' }}>NovoSign</h1>
+          <Image src="/novosign.png" alt="NovoSign" width={120} height={40} style={{ objectFit: 'contain' }} />
         </div>
         <span className="text-xs flex items-center gap-1 ml-1" style={{ color: 'var(--text-muted)' }}>
           <Shield size={11} /> Assinatura Eletrônica com Validade Jurídica

@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { LayoutDashboard, Building2, Users, CreditCard, Package, LogOut, Shield } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
@@ -30,13 +31,8 @@ export default function AdminSidebar({ user }: { user: any }) {
     <aside className="w-56 flex flex-col shrink-0 border-r" style={{ background: 'var(--bg-sidebar)', borderColor: 'var(--border)' }}>
       <div className="px-4 py-4 border-b" style={{ borderColor: 'var(--border)' }}>
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'var(--blue-primary)' }}>
-            <Shield size={16} className="text-white" />
-          </div>
-          <div>
-            <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>Admin</p>
-            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>NovoSign</p>
-          </div>
+          <Image src="/novosign.png" alt="NovoSign" width={100} height={36} style={{ objectFit: 'contain' }} />
+          <span className="text-xs font-semibold px-1.5 py-0.5 rounded" style={{ background: '#dc2626', color: '#fff' }}>Admin</span>
         </div>
       </div>
 
