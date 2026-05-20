@@ -81,7 +81,7 @@ export default function RealtimeToast({ companyId }: { companyId: string }) {
             borderColor: toast.type === 'completed' ? 'rgba(16,185,129,0.3)' : 'var(--blue-border)',
           }}
         >
-          <CheckCircle size={18} style={{ color: toast.type === 'completed' ? '#10b981' : 'var(--blue-primary)', shrink: 0 }} />
+          <CheckCircle size={18} style={{ color: toast.type === 'completed' ? '#10b981' : 'var(--blue-primary)', flexShrink: 0 }} />
           <p className="text-sm font-medium flex-1" style={{ color: 'var(--text-primary)' }}>{toast.message}</p>
           <button onClick={() => setToasts(prev => prev.filter(t => t.id !== toast.id))}
             style={{ color: 'var(--text-muted)' }}>
