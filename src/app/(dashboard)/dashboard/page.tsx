@@ -87,10 +87,8 @@ export default async function DashboardPage() {
               const sc = statusColors[doc.status] ?? statusColors.draft
               return (
                 <Link key={doc.id} href={`/documents/${doc.id}`}
-                  className="flex items-center justify-between px-5 py-3.5 border-b last:border-0 transition-colors"
-                  style={{ borderColor: 'var(--border)', color: 'inherit' }}
-                  onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
-                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+                  className="flex items-center justify-between px-5 py-3.5 border-b last:border-0 transition-colors hover:bg-[var(--bg-hover)]"
+                  style={{ borderColor: 'var(--border)', color: 'inherit' }}>
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'var(--blue-light)' }}>
                       <FileText size={14} style={{ color: 'var(--blue-primary)' }} />
