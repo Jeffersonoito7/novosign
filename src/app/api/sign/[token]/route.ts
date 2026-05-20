@@ -1,14 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { generateOTPCode } from '@/lib/crypto'
 import { sendOTPEmail } from '@/lib/notifications/email'
+import { sendOTPWhatsApp } from '@/lib/notifications/whatsapp'
+
+// Usar service role — rota pública sem sessão de usuário
+function getAdmin() {
+  return createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+}
 
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ token: string }> }
 ) {
   const { token } = await params
-  const supabase = await createClient()
+  const supabase = getAdmin()
 
   const { data: sig } = await supabase
     .from('signatories')
@@ -18,6 +27,8 @@ export async function GET(
 
   if (!sig) return NextResponse.json({ error: 'Link inválido' }, { status: 404 })
   if (sig.status === 'signed') return NextResponse.json({ error: 'Já assinado' }, { status: 409 })
+
+  const doc = sig.documents as any
 
   // Registrar visualização
   const ip = req.headers.get('x-forwarded-for') ?? req.headers.get('x-real-ip') ?? 'unknown'
@@ -49,7 +60,14 @@ export async function GET(
         to: sig.email,
         signatoryName: sig.name,
         code,
-        documentTitle: sig.documents.title,
+        documentTitle: doc.title,
+      })
+    } else if (sig.notification_channel === 'whatsapp' && sig.phone) {
+      await sendOTPWhatsApp({
+        phone: sig.phone,
+        signatoryName: sig.name,
+        code,
+        documentTitle: doc.title,
       })
     }
   } catch (err) {
@@ -71,9 +89,9 @@ export async function GET(
       notification_channel: sig.notification_channel,
     },
     document: {
-      title: sig.documents.title,
-      message: sig.documents.message,
-      file_hash: sig.documents.file_hash,
+      title: doc.title,
+      message: doc.message,
+      file_hash: doc.file_hash,
     },
   })
 }

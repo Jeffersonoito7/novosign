@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
+
+function getAdmin() {
+  return createAdminClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
+}
 import { generateSignedPDF } from '@/lib/pdf/generate'
 import { sendSignatureCompletedEmail } from '@/lib/notifications/email'
 import { dispatchWebhook } from '@/lib/api-auth'
@@ -12,7 +16,7 @@ export async function POST(
   const body = await req.json()
   const { signatureImageBase64, geolocation } = body
 
-  const supabase = await createClient()
+  const supabase = getAdmin()
   const ip = req.headers.get('x-forwarded-for') ?? req.headers.get('x-real-ip') ?? 'unknown'
   const userAgent = req.headers.get('user-agent') ?? ''
 
