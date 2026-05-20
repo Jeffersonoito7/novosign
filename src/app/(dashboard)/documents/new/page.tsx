@@ -4,7 +4,6 @@ import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useDropzone } from 'react-dropzone'
 import { Upload, FileText, X, Plus, Trash2 } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
 import type { NotificationChannel } from '@/types'
 
 interface SignatoryInput {
@@ -59,66 +58,18 @@ export default function NewDocumentPage() {
     setError('')
 
     try {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Não autenticado')
+      const formData = new FormData()
+      formData.append('file', file!)
+      formData.append('title', title)
+      if (message) formData.append('message', message)
+      formData.append('signatories', JSON.stringify(signatories))
 
-      const { data: profile } = await supabase.from('users').select('company_id').eq('id', user.id).single()
-      if (!profile) throw new Error('Perfil não encontrado')
+      const res = await fetch('/api/documents', { method: 'POST', body: formData })
+      const body = await res.json()
 
-      // Calcular hash SHA-256 do arquivo
-      const arrayBuffer = await file!.arrayBuffer()
-      const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer)
-      const hashArray = Array.from(new Uint8Array(hashBuffer))
-      const fileHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+      if (!res.ok) throw new Error(body.error ?? 'Erro ao criar documento.')
 
-      // Upload do arquivo no Supabase Storage
-      const fileName = `${profile.company_id}/${Date.now()}_${file!.name}`
-      const { error: uploadError } = await supabase.storage
-        .from('documents')
-        .upload(fileName, file!)
-
-      if (uploadError) throw new Error('Erro ao fazer upload do arquivo.')
-
-      // Criar documento
-      const { data: doc, error: docError } = await supabase
-        .from('documents')
-        .insert({
-          company_id: profile.company_id,
-          title,
-          message: message || null,
-          file_path: fileName,
-          file_hash: fileHash,
-          created_by: user.id,
-          status: 'draft',
-        })
-        .select()
-        .single()
-
-      if (docError || !doc) throw new Error('Erro ao criar documento.')
-
-      // Criar signatários
-      const sigInserts = signatories.map((s, i) => ({
-        document_id: doc.id,
-        name: s.name,
-        email: s.email,
-        phone: s.phone || null,
-        cpf: s.cpf || null,
-        sign_order: i + 1,
-        notification_channel: s.notification_channel,
-      }))
-
-      const { error: sigError } = await supabase.from('signatories').insert(sigInserts)
-      if (sigError) throw new Error('Erro ao adicionar signatários.')
-
-      // Evento de auditoria
-      await supabase.from('audit_events').insert({
-        document_id: doc.id,
-        event_type: 'document_created',
-        metadata: { created_by: user.id },
-      })
-
-      router.push(`/documents/${doc.id}`)
+      router.push(`/documents/${body.documentId}`)
     } catch (err: any) {
       setError(err.message ?? 'Erro inesperado.')
       setLoading(false)
