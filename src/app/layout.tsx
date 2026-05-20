@@ -8,11 +8,6 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 export const metadata: Metadata = {
   title: 'NovoSign — Assinatura Eletrônica com Validade Jurídica',
   description: 'Assine documentos com validade jurídica. Rápido, seguro e conforme a Lei 14.063/2020.',
-  icons: {
-    icon: '/fecoin-novosign.png',
-    shortcut: '/fecoin-novosign.png',
-    apple: '/fecoin-novosign.png',
-  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
