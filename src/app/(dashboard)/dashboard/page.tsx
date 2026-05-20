@@ -63,7 +63,7 @@ export default async function DashboardPage() {
           <p className="text-gray-500 text-sm mt-1">Bem-vindo, {profile?.name}</p>
         </div>
         <Link
-          href="/dashboard/documents/new"
+          href="/documents/new"
           className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
         >
           <Plus size={16} />
@@ -88,7 +88,7 @@ export default async function DashboardPage() {
       <div className="bg-white rounded-xl border border-gray-200">
         <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
           <h2 className="font-semibold text-gray-900">Documentos recentes</h2>
-          <Link href="/dashboard/documents" className="text-sm text-blue-600 hover:underline">
+          <Link href="/documents" className="text-sm text-blue-600 hover:underline">
             Ver todos
           </Link>
         </div>
@@ -98,7 +98,7 @@ export default async function DashboardPage() {
             <FileText size={32} className="text-gray-300 mx-auto mb-3" />
             <p className="text-gray-500 text-sm">Nenhum documento criado ainda.</p>
             <Link
-              href="/dashboard/documents/new"
+              href="/documents/new"
               className="inline-flex items-center gap-1.5 mt-3 text-sm text-blue-600 hover:underline"
             >
               <Plus size={14} /> Criar primeiro documento
@@ -112,7 +112,7 @@ export default async function DashboardPage() {
               return (
                 <Link
                   key={doc.id}
-                  href={`/dashboard/documents/${doc.id}`}
+                  href={`/documents/${doc.id}`}
                   className="flex items-center justify-between px-5 py-3.5 hover:bg-gray-50 transition-colors"
                 >
                   <div className="flex items-center gap-3">

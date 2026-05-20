@@ -118,7 +118,7 @@ export default function NewDocumentPage() {
         metadata: { created_by: user.id },
       })
 
-      router.push(`/dashboard/documents/${doc.id}`)
+      router.push(`/documents/${doc.id}`)
     } catch (err: any) {
       setError(err.message ?? 'Erro inesperado.')
       setLoading(false)

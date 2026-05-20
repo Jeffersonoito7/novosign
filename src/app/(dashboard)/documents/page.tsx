@@ -28,7 +28,7 @@ export default async function DocumentsPage() {
           <p className="text-gray-500 text-sm mt-1">{documents?.length ?? 0} documento(s)</p>
         </div>
         <Link
-          href="/dashboard/documents/new"
+          href="/documents/new"
           className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
         >
           <Plus size={16} />
@@ -60,7 +60,7 @@ export default async function DocumentsPage() {
                 return (
                   <tr key={doc.id} className="hover:bg-gray-50 cursor-pointer">
                     <td className="px-5 py-4">
-                      <Link href={`/dashboard/documents/${doc.id}`} className="flex items-center gap-3">
+                      <Link href={`/documents/${doc.id}`} className="flex items-center gap-3">
                         <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center shrink-0">
                           <FileText size={14} className="text-blue-600" />
                         </div>

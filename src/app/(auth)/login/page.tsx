@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
@@ -34,8 +35,11 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-blue-600">NovoSign</h1>
-          <p className="text-gray-500 mt-1 text-sm">Assinatura Eletrônica com Validade Jurídica</p>
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <Image src="/logo.svg" alt="NovoSign" width={52} height={52} />
+            <h1 className="text-3xl font-bold text-blue-600">NovoSign</h1>
+          </div>
+          <p className="text-gray-500 text-sm">Assinatura Eletrônica com Validade Jurídica</p>
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">

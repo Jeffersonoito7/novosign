@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { FileText, LayoutDashboard, Users, Settings, LogOut, FileCheck, Zap, Key } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
@@ -9,11 +10,11 @@ import { cn } from '@/lib/utils'
 
 const nav = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/dashboard/documents', label: 'Documentos', icon: FileText },
-  { href: '/dashboard/templates', label: 'Templates', icon: FileCheck },
-  { href: '/dashboard/contacts', label: 'Contatos', icon: Users },
-  { href: '/dashboard/api-keys', label: 'API & Integrações', icon: Key },
-  { href: '/dashboard/settings', label: 'Configurações', icon: Settings },
+  { href: '/documents', label: 'Documentos', icon: FileText },
+  { href: '/templates', label: 'Templates', icon: FileCheck },
+  { href: '/contacts', label: 'Contatos', icon: Users },
+  { href: '/api-keys', label: 'API & Integrações', icon: Key },
+  { href: '/settings', label: 'Configurações', icon: Settings },
 ]
 
 export default function Sidebar({ user, credits }: { user: any; credits: number }) {
@@ -29,14 +30,19 @@ export default function Sidebar({ user, credits }: { user: any; credits: number 
 
   return (
     <aside className="w-60 flex flex-col bg-white border-r border-gray-200 shrink-0">
-      <div className="px-5 py-4 border-b border-gray-100">
-        <h1 className="text-xl font-bold text-blue-600">NovoSign</h1>
-        <p className="text-xs text-gray-400 mt-0.5 truncate">{user?.companies?.name ?? 'Minha Empresa'}</p>
+      <div className="px-4 py-3 border-b border-gray-100">
+        <div className="flex items-center gap-2.5">
+          <Image src="/logo.svg" alt="NovoSign" width={36} height={36} />
+          <div>
+            <h1 className="text-lg font-bold text-blue-600 leading-none">NovoSign</h1>
+            <p className="text-xs text-gray-400 mt-0.5 truncate">{user?.companies?.name ?? 'Minha Empresa'}</p>
+          </div>
+        </div>
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-0.5">
         {nav.map(({ href, label, icon: Icon }) => {
-          const active = pathname === href || (href !== '/dashboard' && pathname.startsWith(href))
+          const active = pathname === href || (href !== '/dashboard' && href !== '/' && pathname.startsWith(href))
           return (
             <Link
               key={href}
@@ -58,7 +64,7 @@ export default function Sidebar({ user, credits }: { user: any; credits: number 
       {/* Saldo de créditos */}
       <div className="px-3 pb-2">
         <Link
-          href="/dashboard/credits"
+          href="/credits"
           className={cn(
             'flex items-center justify-between px-3 py-2.5 rounded-xl text-sm transition-colors',
             credits === 0

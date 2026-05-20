@@ -33,7 +33,7 @@ export default function SendButton({ documentId, appUrl }: { documentId: string;
         <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 text-xs px-3 py-2 rounded-lg">
           <Zap size={13} />
           <span>Sem créditos. </span>
-          <a href="/dashboard/credits" className="font-bold underline">Comprar agora →</a>
+          <a href="/credits" className="font-bold underline">Comprar agora →</a>
         </div>
       )}
       <button

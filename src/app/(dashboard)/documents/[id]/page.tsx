@@ -60,7 +60,7 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
       <div className="flex items-start justify-between mb-8">
         <div>
           <div className="flex items-center gap-2 text-sm text-gray-400 mb-2">
-            <Link href="/dashboard/documents" className="hover:text-blue-600">Documentos</Link>
+            <Link href="/documents" className="hover:text-blue-600">Documentos</Link>
             <span>/</span>
             <span className="text-gray-600">{doc.title}</span>
           </div>
