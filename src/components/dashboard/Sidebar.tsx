@@ -3,9 +3,10 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { FileText, LayoutDashboard, Users, Settings, LogOut, FileCheck, Zap, Key } from 'lucide-react'
+import { FileText, LayoutDashboard, Users, Settings, LogOut, FileCheck, Zap, Key, Sun, Moon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import { useTheme } from 'next-themes'
 import { cn } from '@/lib/utils'
 
 const nav = [
@@ -20,6 +21,7 @@ const nav = [
 export default function Sidebar({ user, credits }: { user: any; credits: number }) {
   const pathname = usePathname()
   const router = useRouter()
+  const { theme, setTheme } = useTheme()
 
   async function handleLogout() {
     const supabase = createClient()
@@ -29,17 +31,25 @@ export default function Sidebar({ user, credits }: { user: any; credits: number 
   }
 
   return (
-    <aside className="w-60 flex flex-col bg-white border-r border-gray-200 shrink-0">
-      <div className="px-4 py-3 border-b border-gray-100">
+    <aside className="w-60 flex flex-col shrink-0 border-r transition-colors"
+      style={{ background: 'var(--bg-sidebar)', borderColor: 'var(--border)' }}>
+
+      {/* Logo */}
+      <div className="px-4 py-3 border-b" style={{ borderColor: 'var(--border)' }}>
         <div className="flex items-center gap-2.5">
           <Image src="/logo.svg" alt="NovoSign" width={36} height={36} />
           <div>
-            <h1 className="text-lg font-bold text-blue-600 leading-none">NovoSign</h1>
-            <p className="text-xs text-gray-400 mt-0.5 truncate">{user?.companies?.name ?? 'Minha Empresa'}</p>
+            <h1 className="text-lg font-bold leading-none" style={{ color: 'var(--blue-primary)' }}>
+              NovoSign
+            </h1>
+            <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--text-muted)' }}>
+              {user?.companies?.name ?? 'Minha Empresa'}
+            </p>
           </div>
         </div>
       </div>
 
+      {/* Nav */}
       <nav className="flex-1 px-3 py-4 space-y-0.5">
         {nav.map(({ href, label, icon: Icon }) => {
           const active = pathname === href || (href !== '/dashboard' && href !== '/' && pathname.startsWith(href))
@@ -49,10 +59,13 @@ export default function Sidebar({ user, credits }: { user: any; credits: number 
               href={href}
               className={cn(
                 'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                active
-                  ? 'bg-blue-50 text-blue-700'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
               )}
+              style={{
+                background: active ? 'var(--blue-light)' : 'transparent',
+                color: active ? 'var(--blue-primary)' : 'var(--text-secondary)',
+              }}
+              onMouseEnter={e => { if (!active) (e.currentTarget as HTMLElement).style.background = 'var(--bg-hover)' }}
+              onMouseLeave={e => { if (!active) (e.currentTarget as HTMLElement).style.background = 'transparent' }}
             >
               <Icon size={16} />
               {label}
@@ -61,42 +74,66 @@ export default function Sidebar({ user, credits }: { user: any; credits: number 
         })}
       </nav>
 
-      {/* Saldo de créditos */}
+      {/* Créditos */}
       <div className="px-3 pb-2">
         <Link
           href="/credits"
-          className={cn(
-            'flex items-center justify-between px-3 py-2.5 rounded-xl text-sm transition-colors',
-            credits === 0
-              ? 'bg-red-50 border border-red-200'
-              : 'bg-blue-50 border border-blue-100'
-          )}
+          className="flex items-center justify-between px-3 py-2.5 rounded-xl border text-sm transition-colors"
+          style={{
+            background: credits === 0 ? '#fef2f2' : 'var(--blue-light)',
+            borderColor: credits === 0 ? '#fecaca' : 'var(--blue-border)',
+            color: credits === 0 ? '#dc2626' : 'var(--blue-primary)',
+          }}
         >
           <div className="flex items-center gap-2">
-            <Zap size={15} className={credits === 0 ? 'text-red-500' : 'text-blue-600'} />
-            <span className={`font-medium ${credits === 0 ? 'text-red-700' : 'text-blue-700'}`}>
+            <Zap size={15} />
+            <span className="font-medium">
               {credits === 0 ? 'Sem créditos' : `${credits} crédito${credits !== 1 ? 's' : ''}`}
             </span>
           </div>
-          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${credits === 0 ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'}`}>
-            {credits === 0 ? 'Comprar' : '+ Comprar'}
+          <span className="text-xs font-bold px-2 py-0.5 rounded-full"
+            style={{ background: credits === 0 ? '#fee2e2' : 'var(--blue-border)', color: 'inherit' }}>
+            + Comprar
           </span>
         </Link>
       </div>
 
-      <div className="px-3 py-4 border-t border-gray-100">
-        <div className="flex items-center gap-3 px-3 py-2 mb-1">
-          <div className="w-7 h-7 bg-blue-100 rounded-full flex items-center justify-center text-xs font-bold text-blue-700">
+      {/* Footer */}
+      <div className="px-3 py-4 border-t space-y-0.5" style={{ borderColor: 'var(--border)' }}>
+
+        {/* Toggle tema */}
+        <button
+          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm w-full transition-colors"
+          style={{ color: 'var(--text-secondary)' }}
+          onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
+          onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+        >
+          {theme === 'dark'
+            ? <Sun size={16} className="text-yellow-400" />
+            : <Moon size={16} />
+          }
+          {theme === 'dark' ? 'Modo claro' : 'Modo escuro'}
+        </button>
+
+        {/* Usuário */}
+        <div className="flex items-center gap-3 px-3 py-2">
+          <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white"
+            style={{ background: 'var(--blue-primary)' }}>
             {user?.name?.[0]?.toUpperCase() ?? '?'}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-900 truncate">{user?.name}</p>
-            <p className="text-xs text-gray-400 truncate">{user?.email}</p>
+            <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{user?.name}</p>
+            <p className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>{user?.email}</p>
           </div>
         </div>
+
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-500 hover:bg-gray-50 hover:text-red-600 transition-colors w-full"
+          className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors w-full"
+          style={{ color: 'var(--text-muted)' }}
+          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#ef4444'; (e.currentTarget as HTMLElement).style.background = 'var(--bg-hover)' }}
+          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'; (e.currentTarget as HTMLElement).style.background = 'transparent' }}
         >
           <LogOut size={16} />
           Sair

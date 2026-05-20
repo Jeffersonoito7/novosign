@@ -19,9 +19,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const credits = (profile?.companies as any)?.credits ?? 0
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen transition-colors" style={{ background: 'var(--bg)' }}>
       <Sidebar user={profile} credits={credits} />
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-auto" style={{ color: 'var(--text-primary)' }}>
         {children}
       </main>
     </div>
