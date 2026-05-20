@@ -16,15 +16,17 @@ export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ token: string }> }
 ) {
+  try {
   const { token } = await params
   const supabase = getAdmin()
 
-  const { data: sig } = await supabase
+  const { data: sig, error: sigError } = await supabase
     .from('signatories')
     .select('*, documents(*)')
     .eq('token', token)
     .single()
 
+  if (sigError) return NextResponse.json({ error: 'Erro DB: ' + sigError.message }, { status: 500 })
   if (!sig) return NextResponse.json({ error: 'Link inválido' }, { status: 404 })
   if (sig.status === 'signed') return NextResponse.json({ error: 'Já assinado' }, { status: 409 })
 
@@ -94,4 +96,8 @@ export async function GET(
       file_hash: doc.file_hash,
     },
   })
+  } catch (err: any) {
+    console.error('Sign route error:', err)
+    return NextResponse.json({ error: err?.message ?? 'Erro interno', stack: err?.stack?.slice(0, 200) }, { status: 500 })
+  }
 }
