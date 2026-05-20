@@ -5,7 +5,8 @@ export async function GET(req: NextRequest) {
   const key = process.env.RESEND_API_KEY
   if (!key) return NextResponse.json({ error: 'RESEND_API_KEY não configurada' }, { status: 500 })
 
-  const to = req.nextUrl.searchParams.get('to') ?? 'oito7digital@gmail.com'
+  const to = req.nextUrl.searchParams.get('to')
+  if (!to) return NextResponse.json({ error: 'Parâmetro ?to= obrigatório' }, { status: 400 })
 
   try {
     const resend = new Resend(key)
