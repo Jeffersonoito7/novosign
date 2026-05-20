@@ -41,23 +41,13 @@ export async function GET(
       .eq('id', sig.document_id)
       .single()
 
-    if (!doc) {
-      return NextResponse.json({ error: 'Documento não encontrado' }, { status: 404 })
-    }
-
-    if (doc.status === 'cancelled') {
-      return NextResponse.json({ error: 'Este documento foi cancelado' }, { status: 410 })
-    }
-
-    if (doc.status === 'completed') {
-      return NextResponse.json({ error: 'Este documento já foi concluído' }, { status: 410 })
-    }
-
+    if (!doc) return NextResponse.json({ error: 'Documento não encontrado' }, { status: 404 })
+    if (doc.status === 'cancelled') return NextResponse.json({ error: 'Este documento foi cancelado' }, { status: 410 })
+    if (doc.status === 'completed') return NextResponse.json({ error: 'Este documento já foi concluído' }, { status: 410 })
     if (doc.expires_at && new Date(doc.expires_at) < new Date()) {
       return NextResponse.json({ error: 'O prazo para assinar este documento expirou' }, { status: 410 })
     }
 
-    // Registrar evento "viewed"
     const ip = req.headers.get('x-forwarded-for') ?? req.headers.get('x-real-ip') ?? 'unknown'
     const userAgent = req.headers.get('user-agent') ?? ''
 
@@ -73,16 +63,21 @@ export async function GET(
       await supabase.from('signatories').update({ status: 'viewed' }).eq('id', sig.id)
     }
 
-    // Gerar e enviar OTP
+    // Gerar OTP e salvar
     const code = generateOTP()
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString()
 
-    await supabase.from('verification_codes').insert({
+    const { error: otpError } = await supabase.from('verification_codes').insert({
       signatory_id: sig.id,
       code,
       channel: sig.notification_channel ?? 'email',
       expires_at: expiresAt,
     })
+
+    if (otpError) {
+      console.error('Erro ao salvar OTP:', otpError)
+      return NextResponse.json({ error: 'Erro ao gerar código de verificação' }, { status: 500 })
+    }
 
     await supabase.from('audit_events').insert({
       document_id: sig.document_id,
@@ -96,21 +91,27 @@ export async function GET(
 
     if (channel === 'email') {
       try {
-        await sendOTPEmail({
+        const result = await sendOTPEmail({
           to: sig.email,
           signatoryName: sig.name,
           code,
           documentTitle: doc.title,
         })
-      } catch (emailErr) {
-        console.error('Erro ao enviar OTP por email:', emailErr)
+        console.log('OTP email enviado:', JSON.stringify(result))
+      } catch (emailErr: any) {
+        console.error('Erro ao enviar OTP email:', emailErr?.message ?? emailErr)
       }
     } else if (channel === 'whatsapp' && sig.phone) {
       try {
         const { sendOTPWhatsApp } = await import('@/lib/notifications/whatsapp')
-        await sendOTPWhatsApp({ phone: sig.phone, signatoryName: sig.name, code, documentTitle: doc.title })
-      } catch (waErr) {
-        console.error('Erro ao enviar OTP por WhatsApp:', waErr)
+        await sendOTPWhatsApp({
+          phone: sig.phone,
+          signatoryName: sig.name,
+          code,
+          documentTitle: doc.title,
+        })
+      } catch (waErr: any) {
+        console.error('Erro ao enviar OTP WhatsApp:', waErr?.message ?? waErr)
       }
     }
 

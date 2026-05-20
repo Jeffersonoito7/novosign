@@ -192,8 +192,9 @@ export default function NewDocumentPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">CPF <span className="text-gray-400">(opcional)</span></label>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">CPF <span className="text-red-500">*</span></label>
                   <input
+                    required
                     value={sig.cpf}
                     onChange={e => updateSignatory(i, 'cpf', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -243,7 +244,7 @@ export default function NewDocumentPage() {
             </button>
             <button
               onClick={() => setStep('review')}
-              disabled={signatories.some(s => !s.name || !s.email)}
+              disabled={signatories.some(s => !s.name || !s.email || !s.cpf)}
               className="flex-1 bg-blue-600 text-white py-2.5 rounded-lg font-medium text-sm hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               Revisar
