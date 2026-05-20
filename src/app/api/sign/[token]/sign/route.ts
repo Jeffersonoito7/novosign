@@ -135,7 +135,24 @@ export async function POST(
               downloadUrl,
               verifyUrl,
             })
-          } catch {}
+          } catch (emailErr) {
+            console.error('Erro ao enviar email de conclusão:', emailErr)
+          }
+
+          if (s.notification_channel === 'whatsapp' && s.phone) {
+            try {
+              const { sendCompletedWhatsApp } = await import('@/lib/notifications/whatsapp')
+              await sendCompletedWhatsApp({
+                phone: s.phone,
+                name: s.name,
+                documentTitle: doc.title,
+                downloadUrl,
+                verifyUrl,
+              })
+            } catch (waErr) {
+              console.error('Erro ao enviar WhatsApp de conclusão:', waErr)
+            }
+          }
         }
       }
     } catch (err) {

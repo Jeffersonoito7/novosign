@@ -14,6 +14,34 @@ interface SignatoryInput {
   notification_channel: NotificationChannel
 }
 
+function validarCPF(cpf: string): boolean {
+  const nums = cpf.replace(/\D/g, '')
+  if (nums.length !== 11) return false
+  if (/^(\d)\1{10}$/.test(nums)) return false
+  let sum = 0
+  for (let i = 0; i < 9; i++) sum += parseInt(nums[i]) * (10 - i)
+  let rest = (sum * 10) % 11
+  if (rest === 10 || rest === 11) rest = 0
+  if (rest !== parseInt(nums[9])) return false
+  sum = 0
+  for (let i = 0; i < 10; i++) sum += parseInt(nums[i]) * (11 - i)
+  rest = (sum * 10) % 11
+  if (rest === 10 || rest === 11) rest = 0
+  return rest === parseInt(nums[10])
+}
+
+function formatarCPF(value: string): string {
+  const nums = value.replace(/\D/g, '').slice(0, 11)
+  return nums
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d{1,2})$/, '$1-$2')
+}
+
+function validarEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+}
+
 export default function NewDocumentPage() {
   const router = useRouter()
   const [step, setStep] = useState<'upload' | 'signatories' | 'review'>('upload')
@@ -25,6 +53,17 @@ export default function NewDocumentPage() {
   ])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  function signatoryError(s: SignatoryInput): string | null {
+    if (!s.name.trim()) return 'Nome obrigatório'
+    if (!validarEmail(s.email)) return 'E-mail inválido'
+    if (!validarCPF(s.cpf)) return 'CPF inválido'
+    if (s.notification_channel === 'whatsapp' && !s.phone.trim()) return 'WhatsApp obrigatório'
+    return null
+  }
+
+  const signatoryErrors = signatories.map(signatoryError)
+  const hasErrors = signatoryErrors.some(e => e !== null)
 
   const onDrop = useCallback((accepted: File[]) => {
     const f = accepted[0]
@@ -162,7 +201,10 @@ export default function NewDocumentPage() {
           {signatories.map((sig, i) => (
             <div key={i} className="bg-white border border-gray-200 rounded-xl p-5">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-semibold text-gray-900">Assinante {i + 1}</h3>
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-900">Assinante {i + 1}</h3>
+                  {signatoryErrors[i] && <p className="text-xs text-red-500 mt-0.5">{signatoryErrors[i]}</p>}
+                </div>
                 {signatories.length > 1 && (
                   <button onClick={() => removeSignatory(i)} className="text-red-400 hover:text-red-600">
                     <Trash2 size={16} />
@@ -196,10 +238,13 @@ export default function NewDocumentPage() {
                   <input
                     required
                     value={sig.cpf}
-                    onChange={e => updateSignatory(i, 'cpf', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onChange={e => updateSignatory(i, 'cpf', formatarCPF(e.target.value))}
+                    className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${sig.cpf && !validarCPF(sig.cpf) ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
                     placeholder="000.000.000-00"
                   />
+                  {sig.cpf && !validarCPF(sig.cpf) && (
+                    <p className="text-red-500 text-xs mt-0.5">CPF inválido</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-600 mb-1">Telefone / WhatsApp <span className="text-gray-400">(opcional)</span></label>
@@ -244,7 +289,7 @@ export default function NewDocumentPage() {
             </button>
             <button
               onClick={() => setStep('review')}
-              disabled={signatories.some(s => !s.name || !s.email || !s.cpf)}
+              disabled={hasErrors}
               className="flex-1 bg-blue-600 text-white py-2.5 rounded-lg font-medium text-sm hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               Revisar
