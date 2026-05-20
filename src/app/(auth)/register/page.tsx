@@ -46,36 +46,19 @@ export default function RegisterPage() {
       return
     }
 
-    // Criar empresa com 3 créditos grátis
-    const { data: company, error: companyError } = await supabase
-      .from('companies')
-      .insert({ name: companyName, cnpj: cnpj || null, email, credits: 3 })
-      .select()
-      .single()
+    // Criar empresa e usuário via API (admin client bypassa RLS)
+    const res = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: data.user.id, name, email, companyName, cnpj }),
+    })
 
-    if (companyError || !company) {
-      setError('Erro ao criar empresa.')
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}))
+      setError(body.error ?? 'Erro ao criar empresa.')
       setLoading(false)
       return
     }
-
-    // Criar perfil do usuário
-    await supabase.from('users').insert({
-      id: data.user.id,
-      company_id: company.id,
-      name,
-      email,
-      role: 'owner',
-    })
-
-    // Registrar os 3 créditos grátis
-    await supabase.from('credit_transactions').insert({
-      company_id: company.id,
-      type: 'bonus',
-      credits: 3,
-      balance_after: 3,
-      description: 'Bônus de boas-vindas — 3 créditos grátis',
-    })
 
     router.push('/dashboard')
     router.refresh()
