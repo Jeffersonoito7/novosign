@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { sendSignatureRequestEmail } from '@/lib/notifications/email'
+import { sendSignatureRequestWhatsApp } from '@/lib/notifications/whatsapp'
 
 export async function POST(
   _req: NextRequest,
@@ -73,8 +74,15 @@ export async function POST(
           message: doc.message,
           expiresAt: doc.expires_at,
         })
+      } else if (sig.notification_channel === 'whatsapp' && sig.phone) {
+        await sendSignatureRequestWhatsApp({
+          phone: sig.phone,
+          signatoryName: sig.name,
+          documentTitle: doc.title,
+          senderName: profile?.name ?? 'NovoSign',
+          signUrl,
+        })
       }
-      // WhatsApp e SMS serão implementados na Fase 2
     } catch (err) {
       console.error('Erro ao notificar signatário:', err)
     }
