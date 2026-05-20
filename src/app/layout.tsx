@@ -3,7 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/components/ThemeProvider'
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
 export const metadata: Metadata = {
   title: 'NovoSign — Assinatura Eletrônica com Validade Jurídica',
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR" className="h-full" suppressHydrationWarning>
-      <body className={`${inter.className} h-full antialiased`}>
+      <body className={`${inter.variable} ${inter.className} h-full antialiased`}>
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>

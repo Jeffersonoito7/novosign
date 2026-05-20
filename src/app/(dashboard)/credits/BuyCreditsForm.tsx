@@ -1,9 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Star, Zap } from 'lucide-react'
+import { Check, Zap } from 'lucide-react'
 import { formatPrice, pricePerCredit } from '@/lib/stripe'
-import { useRouter } from 'next/navigation'
 
 interface Package {
   id: string
@@ -16,117 +15,151 @@ interface Package {
 
 export default function BuyCreditsForm({ packages }: { packages: Package[] }) {
   const [annual, setAnnual] = useState(false)
-  const [loading, setLoading] = useState<string | null>(null)
-  const router = useRouter()
+  const [selected, setSelected] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
 
-  async function handleBuy(packageId: string) {
-    setLoading(packageId)
+  async function handleBuy() {
+    if (!selected) return
+    setLoading(true)
     const res = await fetch('/api/credits/checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ packageId, annual }),
+      body: JSON.stringify({ packageId: selected, annual }),
     })
     const data = await res.json()
     if (data.url) {
       window.location.href = data.url
     } else {
       alert(data.error ?? 'Erro ao iniciar pagamento.')
-      setLoading(null)
+      setLoading(false)
     }
   }
 
-  const savings = annual ? 12 : 0
+  const selectedPkg = packages.find(p => p.id === selected)
+  const selectedPrice = selectedPkg ? (annual ? selectedPkg.priceAnnual : selectedPkg.price) : null
 
   return (
     <div>
-      {/* Toggle mensal/anual */}
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold text-gray-900">Comprar créditos</h2>
-        <div className="flex items-center gap-3 bg-gray-100 rounded-xl p-1">
+      {/* Toggle */}
+      <div className="flex items-center gap-4 mb-8">
+        <h2 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
+          Comprar créditos
+        </h2>
+        <div className="flex items-center rounded-xl p-1 border ml-auto" style={{ background: 'var(--bg-hover)', borderColor: 'var(--border)' }}>
           <button
             onClick={() => setAnnual(false)}
-            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${!annual ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'}`}
+            className="px-5 py-1.5 rounded-lg text-sm font-medium transition-all"
+            style={{
+              background: !annual ? 'var(--bg-card)' : 'transparent',
+              color: !annual ? 'var(--text-primary)' : 'var(--text-muted)',
+              boxShadow: !annual ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+            }}
           >
             Avulso
           </button>
           <button
             onClick={() => setAnnual(true)}
-            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 ${annual ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'}`}
+            className="px-5 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2"
+            style={{
+              background: annual ? 'var(--bg-card)' : 'transparent',
+              color: annual ? 'var(--text-primary)' : 'var(--text-muted)',
+              boxShadow: annual ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+            }}
           >
             Mensal
-            <span className="bg-green-100 text-green-700 text-xs px-1.5 py-0.5 rounded-full font-bold">−12%</span>
+            <span className="text-xs font-bold px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(16,185,129,0.15)', color: '#059669' }}>
+              −12%
+            </span>
           </button>
         </div>
       </div>
 
-      {annual && (
-        <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3 mb-5 text-sm text-green-800">
-          <strong>Plano mensal:</strong> créditos renováveis todo mês com 12% de desconto. Cancele quando quiser.
-        </div>
-      )}
-
-      <div className="grid grid-cols-3 gap-4">
+      {/* Grade de pacotes */}
+      <div className="grid grid-cols-3 gap-3 mb-6">
         {packages.map(pkg => {
           const price = annual ? pkg.priceAnnual : pkg.price
-          const perCredit = pricePerCredit(price, pkg.credits)
-          const isLoading = loading === pkg.id
+          const isSelected = selected === pkg.id
 
           return (
-            <div
+            <button
               key={pkg.id}
-              className={`relative bg-white rounded-2xl border p-5 flex flex-col ${
-                pkg.highlight
-                  ? 'border-blue-400 shadow-md shadow-blue-100'
-                  : 'border-gray-200'
-              }`}
+              onClick={() => setSelected(pkg.id)}
+              className="relative rounded-2xl border p-5 text-left transition-all cursor-pointer"
+              style={{
+                background: isSelected ? 'var(--blue-light)' : 'var(--bg-card)',
+                borderColor: isSelected ? 'var(--blue-primary)' : 'var(--border)',
+                borderWidth: isSelected ? 2 : 1,
+                outline: 'none',
+              }}
             >
-              {pkg.highlight && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
-                    <Star size={10} fill="white" /> Mais popular
-                  </span>
+              {/* Selecionado */}
+              {isSelected && (
+                <div className="absolute top-3 right-3 w-5 h-5 rounded-full flex items-center justify-center"
+                  style={{ background: 'var(--blue-primary)' }}>
+                  <Check size={12} color="white" strokeWidth={3} />
                 </div>
               )}
 
-              <div className="mb-4">
-                <p className="text-sm font-medium text-gray-500">{pkg.name}</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">
+              {/* Créditos */}
+              <div className="mb-3">
+                <span className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
                   {pkg.credits}
-                  <span className="text-base font-normal text-gray-500 ml-1">créditos</span>
-                </p>
+                </span>
+                <span className="text-sm ml-1" style={{ color: 'var(--text-muted)' }}>créditos</span>
               </div>
 
-              <div className="flex-1">
-                <p className="text-2xl font-bold text-gray-900">
+              {/* Preço */}
+              <div>
+                <p className="text-xl font-bold" style={{ color: 'var(--blue-primary)' }}>
                   {formatPrice(price)}
-                  {annual && <span className="text-sm font-normal text-gray-500">/mês</span>}
+                  {annual && <span className="text-sm font-normal ml-1" style={{ color: 'var(--text-muted)' }}>/mês</span>}
                 </p>
-                <p className="text-sm text-gray-400 mt-0.5">{perCredit} por crédito</p>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                  {pricePerCredit(price, pkg.credits)} por crédito
+                </p>
               </div>
-
-              <button
-                onClick={() => handleBuy(pkg.id)}
-                disabled={isLoading}
-                className={`mt-5 w-full py-2.5 rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
-                  pkg.highlight
-                    ? 'bg-blue-600 text-white hover:bg-blue-700'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                } disabled:opacity-50`}
-              >
-                {isLoading ? (
-                  <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <Zap size={14} />
-                )}
-                {isLoading ? 'Aguarde...' : 'Comprar'}
-              </button>
-            </div>
+            </button>
           )
         })}
       </div>
 
-      <p className="text-center text-xs text-gray-400 mt-5">
-        Pagamento seguro via Stripe · Cartão de crédito · Pix em breve
+      {/* Área de compra */}
+      <div className="rounded-2xl border p-5 flex items-center justify-between"
+        style={{ background: 'var(--bg-card)', borderColor: 'var(--border)' }}>
+        <div>
+          {selectedPkg ? (
+            <>
+              <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+                {selectedPkg.credits} créditos selecionados
+              </p>
+              <p className="text-2xl font-bold mt-0.5" style={{ color: 'var(--text-primary)' }}>
+                {formatPrice(selectedPrice!)}
+                {annual && <span className="text-sm font-normal ml-1" style={{ color: 'var(--text-muted)' }}>/mês</span>}
+              </p>
+            </>
+          ) : (
+            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+              Selecione um pacote acima
+            </p>
+          )}
+        </div>
+
+        <button
+          onClick={handleBuy}
+          disabled={!selected || loading}
+          className="flex items-center gap-2 px-6 py-3 rounded-xl text-white font-medium text-sm transition-opacity disabled:opacity-40 hover:opacity-90"
+          style={{ background: 'var(--blue-primary)' }}
+        >
+          {loading
+            ? <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            : <Zap size={16} />
+          }
+          {loading ? 'Aguarde...' : 'Comprar agora'}
+        </button>
+      </div>
+
+      <p className="text-center text-xs mt-4" style={{ color: 'var(--text-muted)' }}>
+        Pagamento seguro via Stripe · Cartão de crédito · Os créditos não expiram
       </p>
     </div>
   )
