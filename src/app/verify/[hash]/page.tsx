@@ -1,5 +1,6 @@
 import { Shield, CheckCircle, XCircle, Clock } from 'lucide-react'
 import type { ReactElement } from 'react'
+import Image from 'next/image'
 import { formatDate } from '@/lib/utils'
 
 interface VerifyData {
@@ -41,95 +42,87 @@ export default async function VerifyPage({ params }: { params: Promise<{ hash: s
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200 px-6 py-4">
+    <div className="min-h-screen transition-colors" style={{ background: 'var(--bg)' }}>
+      <header className="border-b px-6 py-4 transition-colors" style={{ background: 'var(--bg-card)', borderColor: 'var(--border)' }}>
         <div className="max-w-2xl mx-auto flex items-center gap-3">
-          <h1 className="text-xl font-bold text-blue-600">NovoSign</h1>
-          <span className="text-sm text-gray-400">Verificador de Autenticidade</span>
+          <Image src="/logo.svg" alt="NovoSign" width={28} height={28} />
+          <h1 className="text-xl font-bold" style={{ color: 'var(--blue-primary)' }}>NovoSign</h1>
+          <span className="text-sm" style={{ color: 'var(--text-muted)' }}>Verificador de Autenticidade</span>
         </div>
       </header>
 
       <main className="max-w-2xl mx-auto px-4 py-8">
         {!data.valid ? (
-          <div className="bg-white rounded-2xl border border-red-200 p-8 text-center">
-            <XCircle size={48} className="text-red-400 mx-auto mb-4" />
-            <h2 className="text-xl font-bold text-gray-900 mb-2">Documento não encontrado</h2>
-            <p className="text-gray-500 text-sm">
+          <div className="rounded-2xl border p-8 text-center" style={{ background: 'var(--bg-card)', borderColor: '#fecaca' }}>
+            <XCircle size={48} className="mx-auto mb-4" style={{ color: '#ef4444' }} />
+            <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>Documento não encontrado</h2>
+            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
               O hash informado não corresponde a nenhum documento assinado em nossa plataforma.
             </p>
           </div>
         ) : (
           <div className="space-y-4">
             {/* Status */}
-            <div className="bg-white rounded-2xl border border-green-200 p-6">
+            <div className="rounded-2xl border p-6" style={{ background: 'var(--bg-card)', borderColor: 'rgba(16,185,129,0.3)' }}>
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
-                  <Shield size={24} className="text-green-600" />
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: 'rgba(16,185,129,0.1)' }}>
+                  <Shield size={24} style={{ color: '#10b981' }} />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-green-600">Documento autêntico</p>
-                  <h2 className="text-xl font-bold text-gray-900">{data.document!.title}</h2>
+                  <p className="text-sm font-medium" style={{ color: '#10b981' }}>Documento autêntico</p>
+                  <h2 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>{data.document!.title}</h2>
                 </div>
               </div>
-
               <div className="grid grid-cols-2 gap-3 text-sm">
-                <div>
-                  <p className="text-gray-400 text-xs">Empresa</p>
-                  <p className="font-medium text-gray-900">{data.document!.company}</p>
-                </div>
-                <div>
-                  <p className="text-gray-400 text-xs">Criado em</p>
-                  <p className="font-medium text-gray-900">{formatDate(data.document!.created_at)}</p>
-                </div>
-                <div>
-                  <p className="text-gray-400 text-xs">Status</p>
-                  <p className="font-medium text-green-700">Concluído</p>
-                </div>
-                <div>
-                  <p className="text-gray-400 text-xs">Validade jurídica</p>
-                  <p className="font-medium text-gray-900">Lei 14.063/2020</p>
-                </div>
+                {[
+                  { label: 'Empresa', value: data.document!.company },
+                  { label: 'Criado em', value: formatDate(data.document!.created_at) },
+                  { label: 'Status', value: 'Concluído' },
+                  { label: 'Validade jurídica', value: 'Lei 14.063/2020' },
+                ].map(({ label, value }) => (
+                  <div key={label}>
+                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{label}</p>
+                    <p className="font-medium" style={{ color: 'var(--text-primary)' }}>{value}</p>
+                  </div>
+                ))}
               </div>
             </div>
 
             {/* Hash */}
-            <div className="bg-white rounded-xl border border-gray-200 p-5">
-              <h3 className="font-semibold text-gray-900 mb-3">Integridade do documento</h3>
-              <div className="space-y-2 text-xs">
-                <div>
-                  <p className="text-gray-400 mb-1">Hash do documento assinado (SHA-256)</p>
-                  <p className="font-mono text-gray-700 break-all bg-gray-50 px-3 py-2 rounded-lg">
-                    {data.document!.signed_file_hash}
-                  </p>
-                </div>
+            <div className="rounded-xl border p-5" style={{ background: 'var(--bg-card)', borderColor: 'var(--border)' }}>
+              <h3 className="font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>Integridade do documento</h3>
+              <div className="text-xs">
+                <p className="mb-1" style={{ color: 'var(--text-muted)' }}>Hash do documento assinado (SHA-256)</p>
+                <p className="font-mono break-all px-3 py-2 rounded-lg" style={{ background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>
+                  {data.document!.signed_file_hash}
+                </p>
               </div>
             </div>
 
             {/* Signatários */}
-            <div className="bg-white rounded-xl border border-gray-200">
-              <div className="px-5 py-4 border-b border-gray-100">
-                <h3 className="font-semibold text-gray-900">Signatários</h3>
+            <div className="rounded-xl border" style={{ background: 'var(--bg-card)', borderColor: 'var(--border)' }}>
+              <div className="px-5 py-4 border-b" style={{ borderColor: 'var(--border)' }}>
+                <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>Signatários</h3>
               </div>
-              <div className="divide-y divide-gray-100">
+              <div>
                 {data.signatories?.map((sig, i) => (
-                  <div key={i} className="px-5 py-4">
+                  <div key={i} className="px-5 py-4 border-b last:border-0" style={{ borderColor: 'var(--border)' }}>
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
-                        {sigStatusIcon[sig.status] ?? <Clock size={16} className="text-gray-400" />}
+                        {sigStatusIcon[sig.status] ?? <Clock size={16} style={{ color: 'var(--text-muted)' }} />}
                         <div>
-                          <p className="text-sm font-medium text-gray-900">{sig.name}</p>
-                          <p className="text-xs text-gray-400">{sig.email}</p>
-                          {sig.cpf && <p className="text-xs text-gray-400">CPF: {sig.cpf}</p>}
+                          <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{sig.name}</p>
+                          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{sig.email}</p>
+                          {sig.cpf && <p className="text-xs" style={{ color: 'var(--text-muted)' }}>CPF: {sig.cpf}</p>}
                         </div>
                       </div>
-                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                        sig.status === 'signed' ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'
-                      }`}>
+                      <span className="text-xs px-2 py-1 rounded-full font-medium"
+                        style={{ background: sig.status === 'signed' ? 'rgba(16,185,129,0.1)' : 'var(--bg-hover)', color: sig.status === 'signed' ? '#10b981' : 'var(--text-muted)' }}>
                         {sig.status === 'signed' ? 'Assinado' : sig.status}
                       </span>
                     </div>
                     {sig.status === 'signed' && sig.signed_at && (
-                      <div className="ml-7 mt-2 text-xs text-gray-400 space-y-0.5">
+                      <div className="ml-7 mt-2 text-xs space-y-0.5" style={{ color: 'var(--text-muted)' }}>
                         <p>Assinado em: {formatDate(sig.signed_at)}</p>
                         {sig.ip_address && <p>IP: {sig.ip_address}</p>}
                       </div>
@@ -139,7 +132,7 @@ export default async function VerifyPage({ params }: { params: Promise<{ hash: s
               </div>
             </div>
 
-            <p className="text-center text-xs text-gray-400 py-2">
+            <p className="text-center text-xs py-2" style={{ color: 'var(--text-muted)' }}>
               Este documento foi assinado eletronicamente via NovoSign.<br />
               Conforme a Lei nº 14.063/2020 e a Medida Provisória 2.200-2/2001.
             </p>
