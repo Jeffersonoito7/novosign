@@ -29,7 +29,7 @@ export default function RealtimeToast({ companyId }: { companyId: string }) {
         async (payload: any) => {
           const { event_type, document_id, signatory_id } = payload.new
 
-          // Buscar nome do signatário e documento
+          // Buscar nome do assinante e documento
           let message = ''
           if (event_type === 'signed' && signatory_id) {
             const { data: sig } = await supabase

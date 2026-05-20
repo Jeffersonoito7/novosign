@@ -94,7 +94,7 @@ export default async function LandingPage() {
           <div className="grid grid-cols-3 gap-8">
             {[
               { step: '01', icon: FileText, title: 'Faça upload do PDF', desc: 'Envie o contrato ou documento que precisa ser assinado. Suportamos PDFs de até 20MB.' },
-              { step: '02', icon: Zap, title: 'Defina os signatários', desc: 'Adicione nome, e-mail e CPF de cada pessoa que precisa assinar. Notificamos por e-mail ou WhatsApp.' },
+              { step: '02', icon: Zap, title: 'Defina os assinantes', desc: 'Adicione nome, e-mail e CPF de cada pessoa que precisa assinar. Notificamos por e-mail ou WhatsApp.' },
               { step: '03', icon: CheckCircle, title: 'Receba o PDF assinado', desc: 'Após todas as assinaturas, geramos o PDF com certificado digital e trilha de auditoria completa.' },
             ].map(({ step, icon: Icon, title, desc }) => (
               <div key={step} className="text-center">
@@ -118,7 +118,7 @@ export default async function LandingPage() {
             {[
               { icon: Shield, title: 'Validade jurídica garantida', desc: 'Conforme a Lei 14.063/2020. Aceito em qualquer tribunal brasileiro. Mais seguro que assinatura em papel.' },
               { icon: Lock, title: 'Hash SHA-256 em cada documento', desc: 'Todo documento recebe uma impressão digital criptográfica única. Qualquer alteração é detectada imediatamente.' },
-              { icon: Globe, title: 'Assine de qualquer lugar', desc: 'O signatário recebe um link e assina do celular, sem precisar instalar nada. Funciona em qualquer dispositivo.' },
+              { icon: Globe, title: 'Assine de qualquer lugar', desc: 'O assinante recebe um link e assina do celular, sem precisar instalar nada. Funciona em qualquer dispositivo.' },
               { icon: Zap, title: 'De dias para minutos', desc: 'Elimine impressão, escaneamento e envio por correio. Contratos que levavam dias são assinados em minutos.' },
             ].map(({ icon: Icon, title, desc }) => (
               <div key={title} className="rounded-2xl border p-6 flex gap-4"

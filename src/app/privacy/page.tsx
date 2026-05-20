@@ -17,8 +17,8 @@ export default function PrivacyPage() {
         <p className="text-sm mb-8" style={{ color: 'var(--text-muted)' }}>Última atualização: maio de 2026</p>
 
         {[
-          { title: '1. Dados que coletamos', content: 'Coletamos nome, e-mail, CPF e endereço IP dos signatários para fins de identificação e validade jurídica das assinaturas. Também coletamos dados de navegação (geolocalização aproximada, user-agent) no momento da assinatura, conforme exigido pela Lei 14.063/2020.' },
-          { title: '2. Como usamos seus dados', content: 'Os dados são usados exclusivamente para (a) gerar certificados de assinatura eletrônica com validade jurídica, (b) verificar a identidade dos signatários via código OTP, e (c) compor a trilha de auditoria imutável de cada documento.' },
+          { title: '1. Dados que coletamos', content: 'Coletamos nome, e-mail, CPF e endereço IP dos assinantes para fins de identificação e validade jurídica das assinaturas. Também coletamos dados de navegação (geolocalização aproximada, user-agent) no momento da assinatura, conforme exigido pela Lei 14.063/2020.' },
+          { title: '2. Como usamos seus dados', content: 'Os dados são usados exclusivamente para (a) gerar certificados de assinatura eletrônica com validade jurídica, (b) verificar a identidade dos assinantes via código OTP, e (c) compor a trilha de auditoria imutável de cada documento.' },
           { title: '3. Compartilhamento de dados', content: 'Não vendemos ou compartilhamos dados pessoais com terceiros. Os dados são compartilhados apenas com a empresa que enviou o documento para assinatura, como parte do processo de assinatura eletrônica.' },
           { title: '4. Segurança', content: 'Todos os dados são armazenados de forma criptografada. Os documentos são protegidos por hash SHA-256. O acesso ao banco de dados é controlado por Row Level Security (RLS) do Supabase.' },
           { title: '5. Seus direitos (LGPD)', content: 'Conforme a Lei Geral de Proteção de Dados (Lei 13.709/2018), você tem direito de acessar, corrigir ou solicitar a exclusão dos seus dados. Entre em contato pelo e-mail privacidade@novosign.com.br.' },

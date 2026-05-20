@@ -20,7 +20,7 @@ export async function POST(
     .eq('token', token)
     .single()
 
-  if (!sig) return NextResponse.json({ error: 'Signatário não encontrado' }, { status: 404 })
+  if (!sig) return NextResponse.json({ error: 'Assinante não encontrado' }, { status: 404 })
 
   // Buscar código OTP mais recente não usado
   const { data: otpRecord } = await supabase

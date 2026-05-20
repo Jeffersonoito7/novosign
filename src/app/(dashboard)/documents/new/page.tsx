@@ -84,7 +84,7 @@ export default function NewDocumentPage() {
       {/* Steps */}
       <div className="flex items-center gap-2 mb-8">
         {(['upload', 'signatories', 'review'] as const).map((s, i) => {
-          const labels = { upload: 'Documento', signatories: 'Signatários', review: 'Revisar' }
+          const labels = { upload: 'Documento', signatories: 'Assinantes', review: 'Revisar' }
           const active = step === s
           const done = ['upload', 'signatories', 'review'].indexOf(step) > i
           return (
@@ -136,7 +136,7 @@ export default function NewDocumentPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Mensagem para os signatários <span className="text-gray-400">(opcional)</span></label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Mensagem para os assinantes <span className="text-gray-400">(opcional)</span></label>
             <textarea
               value={message}
               onChange={e => setMessage(e.target.value)}
@@ -151,18 +151,18 @@ export default function NewDocumentPage() {
             onClick={() => setStep('signatories')}
             className="w-full bg-blue-600 text-white py-2.5 rounded-lg font-medium text-sm hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
-            Próximo: Definir Signatários
+            Próximo: Definir Assinantes
           </button>
         </div>
       )}
 
-      {/* Step 2: Signatários */}
+      {/* Step 2: Assinantes */}
       {step === 'signatories' && (
         <div className="space-y-4">
           {signatories.map((sig, i) => (
             <div key={i} className="bg-white border border-gray-200 rounded-xl p-5">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-semibold text-gray-900">Signatário {i + 1}</h3>
+                <h3 className="text-sm font-semibold text-gray-900">Assinante {i + 1}</h3>
                 {signatories.length > 1 && (
                   <button onClick={() => removeSignatory(i)} className="text-red-400 hover:text-red-600">
                     <Trash2 size={16} />
@@ -229,7 +229,7 @@ export default function NewDocumentPage() {
             onClick={addSignatory}
             className="w-full border border-dashed border-gray-300 text-gray-500 py-2.5 rounded-xl text-sm hover:border-blue-400 hover:text-blue-600 transition-colors flex items-center justify-center gap-2"
           >
-            <Plus size={16} /> Adicionar signatário
+            <Plus size={16} /> Adicionar assinante
           </button>
 
           {error && <div className="bg-red-50 text-red-600 text-sm px-3 py-2 rounded-lg">{error}</div>}
@@ -274,7 +274,7 @@ export default function NewDocumentPage() {
           </div>
 
           <div className="bg-white border border-gray-200 rounded-xl p-5">
-            <h3 className="text-sm font-semibold text-gray-700 mb-3">{signatories.length} Signatário(s)</h3>
+            <h3 className="text-sm font-semibold text-gray-700 mb-3">{signatories.length} Assinante(s)</h3>
             <div className="space-y-2">
               {signatories.map((s, i) => (
                 <div key={i} className="flex items-center gap-3 text-sm">

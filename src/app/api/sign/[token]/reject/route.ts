@@ -20,7 +20,7 @@ export async function POST(
     .eq('token', token)
     .single()
 
-  if (!sig) return NextResponse.json({ error: 'Signatário não encontrado' }, { status: 404 })
+  if (!sig) return NextResponse.json({ error: 'Assinante não encontrado' }, { status: 404 })
   if (sig.status === 'signed') return NextResponse.json({ error: 'Já assinado' }, { status: 409 })
 
   await supabase.from('signatories').update({

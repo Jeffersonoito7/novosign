@@ -26,7 +26,7 @@ export async function POST(
     .eq('token', token)
     .single()
 
-  if (!sig) return NextResponse.json({ error: 'Signatário não encontrado' }, { status: 404 })
+  if (!sig) return NextResponse.json({ error: 'Assinante não encontrado' }, { status: 404 })
   if (sig.status === 'signed') return NextResponse.json({ error: 'Já assinado' }, { status: 409 })
 
   const doc = sig.documents
@@ -44,7 +44,7 @@ export async function POST(
     if (!imgErr) signatureImagePath = imagePath
   }
 
-  // Atualizar signatário
+  // Atualizar assinante
   await supabase.from('signatories').update({
     status: 'signed',
     signed_at: new Date().toISOString(),

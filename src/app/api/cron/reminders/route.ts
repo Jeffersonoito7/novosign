@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
   const supabase = getAdmin()
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://novosign.com.br'
 
-  // Buscar signatários pendentes há mais de 24h e menos de 7 dias
+  // Buscar assinantes pendentes há mais de 24h e menos de 7 dias
   const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
   const threshold = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
 

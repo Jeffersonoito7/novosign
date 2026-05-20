@@ -90,7 +90,7 @@ export async function sendCompletedWhatsApp({
 
 Olá, *${name}*!
 
-O documento *${documentTitle}* foi assinado por todos os signatários.
+O documento *${documentTitle}* foi assinado por todos os assinantes.
 
 📥 Baixar PDF: ${downloadUrl}
 🔍 Verificar autenticidade: ${verifyUrl}

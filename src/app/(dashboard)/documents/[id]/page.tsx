@@ -100,11 +100,11 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
       </div>
 
       <div className="grid grid-cols-3 gap-6">
-        {/* Signatários */}
+        {/* Assinantes */}
         <div className="col-span-2 space-y-4">
           <div className="bg-white border border-gray-200 rounded-xl">
             <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-              <h2 className="font-semibold text-gray-900">Signatários</h2>
+              <h2 className="font-semibold text-gray-900">Assinantes</h2>
               {total > 0 && (
                 <span className="text-sm text-gray-500">{signed}/{total} assinado(s)</span>
               )}
@@ -112,7 +112,7 @@ export default async function DocumentDetailPage({ params }: { params: Promise<{
 
             {total === 0 ? (
               <div className="px-5 py-8 text-center text-gray-400 text-sm">
-                Nenhum signatário definido
+                Nenhum assinante definido
               </div>
             ) : (
               <div className="divide-y divide-gray-100">

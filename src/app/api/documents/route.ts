@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Erro ao criar documento' }, { status: 500 })
     }
 
-    // Criar signatários
+    // Criar assinantes
     if (signatories.length > 0) {
       const sigInserts = signatories.map((s: any, i: number) => ({
         document_id: doc.id,
@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
       const { error: sigError } = await admin.from('signatories').insert(sigInserts)
       if (sigError) {
         console.error('Signatories insert error:', sigError)
-        return NextResponse.json({ error: 'Erro ao adicionar signatários' }, { status: 500 })
+        return NextResponse.json({ error: 'Erro ao adicionar assinantes' }, { status: 500 })
       }
     }
 

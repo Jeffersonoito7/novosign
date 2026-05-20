@@ -99,10 +99,10 @@ export default async function VerifyPage({ params }: { params: Promise<{ hash: s
               </div>
             </div>
 
-            {/* Signatários */}
+            {/* Assinantes */}
             <div className="rounded-xl border" style={{ background: 'var(--bg-card)', borderColor: 'var(--border)' }}>
               <div className="px-5 py-4 border-b" style={{ borderColor: 'var(--border)' }}>
-                <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>Signatários</h3>
+                <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>Assinantes</h3>
               </div>
               <div>
                 {data.signatories?.map((sig, i) => (

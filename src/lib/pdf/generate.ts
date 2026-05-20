@@ -134,8 +134,8 @@ async function buildCertificatePage({
   page.drawText(`Hash SHA-256 (original): ${doc.file_hash}`, { x: 50, y: y - 4, size: 7, font, color: gray })
   y -= 80
 
-  // Signatários
-  page.drawText('SIGNATÁRIOS', { x: 40, y, size: 10, font: fontBold, color: blue })
+  // Assinantes
+  page.drawText('ASSINANTES', { x: 40, y, size: 10, font: fontBold, color: blue })
   y -= 16
 
   for (const sig of signatories) {

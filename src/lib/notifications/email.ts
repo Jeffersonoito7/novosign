@@ -108,7 +108,7 @@ export async function sendSignatureCompletedEmail({
           <p style="color:#065f46;font-weight:bold;margin:0">✅ Documento assinado com sucesso!</p>
         </div>
         <p>Olá, ${name}!</p>
-        <p>O documento <strong>${documentTitle}</strong> foi assinado por todos os signatários.</p>
+        <p>O documento <strong>${documentTitle}</strong> foi assinado por todos os assinantes.</p>
         <div style="text-align:center;margin:24px 0;display:flex;gap:16px;justify-content:center">
           <a href="${downloadUrl}" style="background:#2563eb;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold">
             Baixar PDF Assinado

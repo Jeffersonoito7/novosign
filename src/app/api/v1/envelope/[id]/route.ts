@@ -1,6 +1,6 @@
 /**
  * GET /api/v1/envelope/:id
- * Retorna o status do documento e cada signatário.
+ * Retorna o status do documento e cada assinante.
  */
 
 import { NextRequest, NextResponse } from 'next/server'

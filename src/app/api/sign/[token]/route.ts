@@ -32,7 +32,7 @@ export async function GET(
     }
 
     if (sig.status === 'signed') {
-      return NextResponse.json({ error: 'Documento já assinado por este signatário' }, { status: 409 })
+      return NextResponse.json({ error: 'Documento já assinado por este assinante' }, { status: 409 })
     }
 
     const { data: doc } = await supabase

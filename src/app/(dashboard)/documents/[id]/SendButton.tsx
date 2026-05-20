@@ -10,7 +10,7 @@ export default function SendButton({ documentId, appUrl }: { documentId: string;
   const router = useRouter()
 
   async function handleSend() {
-    if (!confirm('Enviar documento para assinatura? 1 crédito será descontado e todos os signatários serão notificados.')) return
+    if (!confirm('Enviar documento para assinatura? 1 crédito será descontado e todos os assinantes serão notificados.')) return
     setLoading(true)
     setNoCredits(false)
     const res = await fetch(`/api/documents/${documentId}/send`, { method: 'POST' })

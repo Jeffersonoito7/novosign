@@ -14,7 +14,7 @@ const steps = [
   },
   {
     icon: Users,
-    title: 'Defina os signatários',
+    title: 'Defina os assinantes',
     desc: 'Adicione nome, e-mail e CPF de quem precisa assinar. Notificamos por e-mail ou WhatsApp.',
     color: '#8b5cf6',
     bg: 'rgba(139,92,246,0.1)',

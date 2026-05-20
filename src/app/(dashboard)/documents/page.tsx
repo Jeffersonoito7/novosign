@@ -49,7 +49,7 @@ export default async function DocumentsPage() {
               <tr className="border-b border-gray-100">
                 <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Documento</th>
                 <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Signatários</th>
+                <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Assinantes</th>
                 <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Criado em</th>
               </tr>
             </thead>
@@ -87,7 +87,7 @@ export default async function DocumentsPage() {
                           </div>
                         </div>
                       ) : (
-                        <span className="text-xs text-gray-400">Sem signatários</span>
+                        <span className="text-xs text-gray-400">Sem assinantes</span>
                       )}
                     </td>
                     <td className="px-5 py-4 text-sm text-gray-500">{formatDate(doc.created_at)}</td>

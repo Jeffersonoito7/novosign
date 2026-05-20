@@ -118,7 +118,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Erro ao criar documento.' }, { status: 500 })
   }
 
-  // Criar signatários
+  // Criar assinantes
   const sigRows = signatories.map((s: any, i: number) => ({
     document_id: doc.id,
     name: s.name,
@@ -135,7 +135,7 @@ export async function POST(req: NextRequest) {
     .select()
 
   if (sigErr || !createdSigs) {
-    return NextResponse.json({ error: 'Erro ao criar signatários.' }, { status: 500 })
+    return NextResponse.json({ error: 'Erro ao criar assinantes.' }, { status: 500 })
   }
 
   // Descontar crédito
