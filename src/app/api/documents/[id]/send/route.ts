@@ -54,8 +54,8 @@ export async function POST(
 
   await admin.from('credit_transactions').insert({
     company_id: profile.company_id,
-    type: 'usage',
-    credits: 1,
+    type: 'deduction',
+    credits: -1,
     balance_after: newBalance,
     description: `Envio do documento: ${doc.title}`,
     document_id: id,
