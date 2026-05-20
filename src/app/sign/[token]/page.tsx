@@ -27,6 +27,7 @@ export default function SignPage() {
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const isDrawing = useRef(false)
+  const lastPos = useRef<{ x: number; y: number } | null>(null)
   const [hasSignature, setHasSignature] = useState(false)
 
   useEffect(() => {
@@ -38,6 +39,13 @@ export default function SignPage() {
       )
     }
   }, [token])
+
+  useEffect(() => {
+    if (step === 'sign') {
+      // Aguarda o canvas montar antes de configurar
+      setTimeout(() => setupCanvas(), 50)
+    }
+  }, [step])
 
   async function initSignPage() {
     setStep('loading')
@@ -89,42 +97,68 @@ export default function SignPage() {
     setLoading(false)
   }
 
+  function setupCanvas() {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const dpr = window.devicePixelRatio || 1
+    const rect = canvas.getBoundingClientRect()
+    canvas.width = rect.width * dpr
+    canvas.height = rect.height * dpr
+    const ctx = canvas.getContext('2d')!
+    ctx.scale(dpr, dpr)
+  }
+
   function getPos(e: React.MouseEvent | React.TouchEvent, canvas: HTMLCanvasElement) {
     const rect = canvas.getBoundingClientRect()
-    if ('touches' in e) return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top }
+    if ('touches' in e) {
+      return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top }
+    }
     return { x: e.clientX - rect.left, y: e.clientY - rect.top }
   }
 
   function startDraw(e: React.MouseEvent | React.TouchEvent) {
+    e.preventDefault()
     const canvas = canvasRef.current
     if (!canvas) return
+    if (canvas.width === 0) setupCanvas()
     isDrawing.current = true
-    const ctx = canvas.getContext('2d')!
     const pos = getPos(e, canvas)
+    lastPos.current = pos
+    const ctx = canvas.getContext('2d')!
     ctx.beginPath()
     ctx.moveTo(pos.x, pos.y)
   }
 
   function draw(e: React.MouseEvent | React.TouchEvent) {
+    e.preventDefault()
     if (!isDrawing.current) return
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext('2d')!
-    ctx.lineWidth = 2.5
+    ctx.lineWidth = 2
     ctx.lineCap = 'round'
+    ctx.lineJoin = 'round'
     ctx.strokeStyle = '#1e3a8a'
     const pos = getPos(e, canvas)
     ctx.lineTo(pos.x, pos.y)
     ctx.stroke()
+    ctx.beginPath()
+    ctx.moveTo(pos.x, pos.y)
+    lastPos.current = pos
     setHasSignature(true)
   }
 
-  function stopDraw() { isDrawing.current = false }
+  function stopDraw() {
+    isDrawing.current = false
+    lastPos.current = null
+  }
 
   function clearCanvas() {
     const canvas = canvasRef.current
     if (!canvas) return
-    canvas.getContext('2d')!.clearRect(0, 0, canvas.width, canvas.height)
+    const dpr = window.devicePixelRatio || 1
+    const ctx = canvas.getContext('2d')!
+    ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr)
     setHasSignature(false)
   }
 
@@ -309,8 +343,9 @@ export default function SignPage() {
 
           <div className="rounded-xl overflow-hidden mb-3 border-2" style={{ borderColor: hasSignature ? 'var(--blue-primary)' : 'var(--border)', background: '#ffffff' }}>
             <canvas
-              ref={canvasRef} width={520} height={180}
-              className="w-full cursor-crosshair touch-none"
+              ref={canvasRef}
+              style={{ width: '100%', height: 180, display: 'block' }}
+              className="cursor-crosshair touch-none"
               onMouseDown={startDraw} onMouseMove={draw} onMouseUp={stopDraw} onMouseLeave={stopDraw}
               onTouchStart={startDraw} onTouchMove={draw} onTouchEnd={stopDraw}
             />
