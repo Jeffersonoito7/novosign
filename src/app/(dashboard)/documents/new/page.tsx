@@ -315,15 +315,9 @@ export default function NewDocumentPage() {
               Voltar
             </button>
             <button
-              onClick={() => {
-                if (hasErrors) {
-                  setError(signatoryErrors.find(e => e !== null) ?? 'Preencha todos os campos obrigatórios')
-                  return
-                }
-                setError('')
-                setStep('review')
-              }}
-              className="flex-1 bg-blue-600 text-white py-2.5 rounded-lg font-medium text-sm hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              onClick={() => { setError(''); setStep('review') }}
+              disabled={hasErrors}
+              className="flex-1 bg-blue-600 text-white py-2.5 rounded-lg font-medium text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Revisar
             </button>
