@@ -32,8 +32,14 @@ export async function POST(req: NextRequest) {
     const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer)
     const fileHash = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('')
 
+    // Sanitizar nome do arquivo (remove acentos, espaços e caracteres especiais)
+    const safeName = file.name
+      .normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .replace(/[^a-zA-Z0-9._-]/g, '_')
+      .replace(/_+/g, '_')
+
     // Upload via admin (bypassa RLS do storage)
-    const fileName = `${profile.company_id}/${Date.now()}_${file.name}`
+    const fileName = `${profile.company_id}/${Date.now()}_${safeName}`
     const { error: uploadError } = await admin.storage
       .from('documents')
       .upload(fileName, file, { contentType: 'application/pdf' })
