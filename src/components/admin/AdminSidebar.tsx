@@ -30,11 +30,9 @@ export default function AdminSidebar({ user }: { user: any }) {
 
   return (
     <aside className="w-56 flex flex-col shrink-0 border-r" style={{ background: 'var(--bg-sidebar)', borderColor: 'var(--border)' }}>
-      <div className="px-4 py-4 border-b" style={{ borderColor: 'var(--border)' }}>
-        <div className="flex items-center gap-2">
-          <Image src="/novosign.png" alt="NovoSign" width={100} height={36} style={{ objectFit: 'contain' }} />
-          <span className="text-xs font-semibold px-1.5 py-0.5 rounded" style={{ background: '#dc2626', color: '#fff' }}>Admin</span>
-        </div>
+      <div className="px-4 py-4 border-b flex flex-col items-center" style={{ borderColor: 'var(--border)' }}>
+        <Image src="/novosign.png" alt="NovoSign" width={110} height={38} style={{ objectFit: 'contain', filter: 'var(--logo-filter)' }} />
+        <span className="text-xs font-semibold mt-1.5 px-2 py-0.5 rounded-full" style={{ background: '#dc2626', color: '#fff' }}>Painel Admin</span>
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-0.5">
