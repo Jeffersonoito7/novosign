@@ -8,11 +8,16 @@ export async function GET(
   const { hash } = await params
   const supabase = await createClient()
 
-  const { data: doc } = await supabase
+  // Aceita tanto o hash do arquivo assinado quanto o ID do documento
+  const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(hash)
+
+  const query = supabase
     .from('documents')
     .select('id, title, status, file_hash, signed_file_hash, created_at, companies(name)')
-    .eq('signed_file_hash', hash)
-    .single()
+
+  const { data: doc } = await (isUUID
+    ? query.eq('id', hash).single()
+    : query.eq('signed_file_hash', hash).single())
 
   if (!doc) {
     return NextResponse.json({ valid: false, error: 'Documento não encontrado' }, { status: 404 })
