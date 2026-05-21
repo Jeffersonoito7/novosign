@@ -115,6 +115,8 @@ export async function GET(
       }
     }
 
+    console.log(`[sign] canal=${channel} email=${sig.email} code_saved=true`)
+
     return NextResponse.json({
       ok: true,
       signatory: {

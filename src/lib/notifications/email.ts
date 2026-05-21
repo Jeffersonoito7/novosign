@@ -1,6 +1,10 @@
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+function getResend() {
+  const key = process.env.RESEND_API_KEY
+  if (!key) throw new Error('RESEND_API_KEY não configurada')
+  return new Resend(key)
+}
 
 const FROM = 'NovoSign <noreply@novosign.com.br>'
 
@@ -21,7 +25,7 @@ export async function sendSignatureRequestEmail({
   message?: string
   expiresAt?: string
 }) {
-  return resend.emails.send({
+  return getResend().emails.send({
     from: FROM,
     to,
     subject: `${senderName} solicita sua assinatura — ${documentTitle}`,
@@ -66,7 +70,7 @@ export async function sendOTPEmail({
   code: string
   documentTitle: string
 }) {
-  return resend.emails.send({
+  return getResend().emails.send({
     from: FROM,
     to,
     subject: `NovoSign: confirme sua identidade para assinar`,
@@ -107,7 +111,7 @@ export async function sendSignatureCompletedEmail({
   downloadUrl: string
   verifyUrl: string
 }) {
-  return resend.emails.send({
+  return getResend().emails.send({
     from: FROM,
     to,
     subject: `Documento assinado — ${documentTitle}`,
