@@ -4,6 +4,14 @@ import { sha256 } from '@/lib/crypto'
 import { formatDate } from '@/lib/utils'
 import type { Document, Signatory } from '@/types'
 
+function safe(text: string): string {
+  return text
+    .replace(/✓|✔/g, '[OK]')
+    .replace(/✗|✘|✕/g, '[X]')
+    .replace(/○|●|•/g, '-')
+    .replace(/[^\x00-\xFF]/g, '?')
+}
+
 function wrapText(text: string, maxChars: number): string[] {
   const words = text.split(' ')
   const lines: string[] = []
@@ -53,7 +61,7 @@ export async function generateSignedPDF({
       borderColor: rgb(0.8, 0.8, 0.8),
       borderWidth: 0.5,
     })
-    lastPage.drawText(`✓ Assinado por: ${sig.name}`, {
+    lastPage.drawText(safe(`[OK] Assinado por: ${sig.name}`), {
       x: 28,
       y: stampY + 10,
       size: 8,
@@ -61,7 +69,7 @@ export async function generateSignedPDF({
       color: rgb(0.1, 0.4, 0.1),
     })
     lastPage.drawText(
-      `CPF: ${sig.cpf ?? 'N/I'} | IP: ${sig.ip_address ?? 'N/I'} | Em: ${sig.signed_at ? formatDate(sig.signed_at) : ''}`,
+      safe(`CPF: ${sig.cpf ?? 'N/I'} | IP: ${sig.ip_address ?? 'N/I'} | Em: ${sig.signed_at ? formatDate(sig.signed_at) : ''}`),
       {
         x: 28,
         y: stampY,
@@ -128,10 +136,10 @@ async function buildCertificatePage({
   page.drawText('DADOS DO DOCUMENTO', { x: 40, y, size: 10, font: fontBold, color: blue })
   y -= 18
   page.drawRectangle({ x: 40, y: y - 8, width: width - 80, height: 60, color: lightGray, borderColor: rgb(0.85, 0.85, 0.85), borderWidth: 0.5 })
-  page.drawText(`Título: ${doc.title}`, { x: 50, y: y + 34, size: 9, font: fontBold, color: rgb(0.1, 0.1, 0.1) })
-  page.drawText(`ID do Documento: ${doc.id}`, { x: 50, y: y + 20, size: 8, font, color: gray })
-  page.drawText(`Criado em: ${formatDate(doc.created_at)}`, { x: 50, y: y + 8, size: 8, font, color: gray })
-  page.drawText(`Hash SHA-256 (original): ${doc.file_hash}`, { x: 50, y: y - 4, size: 7, font, color: gray })
+  page.drawText(safe(`Titulo: ${doc.title}`), { x: 50, y: y + 34, size: 9, font: fontBold, color: rgb(0.1, 0.1, 0.1) })
+  page.drawText(safe(`ID do Documento: ${doc.id}`), { x: 50, y: y + 20, size: 8, font, color: gray })
+  page.drawText(safe(`Criado em: ${formatDate(doc.created_at)}`), { x: 50, y: y + 8, size: 8, font, color: gray })
+  page.drawText(safe(`Hash SHA-256 (original): ${doc.file_hash}`), { x: 50, y: y - 4, size: 7, font, color: gray })
   y -= 80
 
   // Assinantes
@@ -152,20 +160,20 @@ async function buildCertificatePage({
       color: statusColor,
     })
 
-    page.drawText(`${isSigned ? '✓' : '○'} ${sig.name}`, {
+    page.drawText(safe(`${isSigned ? '[OK]' : '[  ]'} ${sig.name}`), {
       x: 52, y: y, size: 9, font: fontBold, color: rgb(0.1, 0.1, 0.1),
     })
-    page.drawText(`Status: ${isSigned ? 'ASSINADO' : sig.status.toUpperCase()}`, {
+    page.drawText(safe(`Status: ${isSigned ? 'ASSINADO' : sig.status.toUpperCase()}`), {
       x: 52, y: y - 13, size: 8, font: fontBold, color: statusColor,
     })
-    page.drawText(`E-mail: ${sig.email}${sig.cpf ? `  |  CPF: ${sig.cpf}` : ''}`, {
+    page.drawText(safe(`E-mail: ${sig.email}${sig.cpf ? `  |  CPF: ${sig.cpf}` : ''}`), {
       x: 52, y: y - 25, size: 7.5, font, color: gray,
     })
     if (isSigned && sig.signed_at) {
-      page.drawText(`Assinado em: ${formatDate(sig.signed_at)}`, {
+      page.drawText(safe(`Assinado em: ${formatDate(sig.signed_at)}`), {
         x: 52, y: y - 37, size: 7.5, font, color: gray,
       })
-      page.drawText(`IP: ${sig.ip_address ?? 'N/I'}  |  Agente: ${(sig.user_agent ?? '').slice(0, 60)}`, {
+      page.drawText(safe(`IP: ${sig.ip_address ?? 'N/I'}  |  Agente: ${(sig.user_agent ?? '').slice(0, 60)}`), {
         x: 52, y: y - 49, size: 6.5, font, color: gray,
       })
     }
