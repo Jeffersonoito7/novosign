@@ -93,6 +93,13 @@ export default function NewDocumentPage() {
   }
 
   async function handleSubmit() {
+    // Validação final antes de enviar
+    const firstError = signatoryErrors.find(e => e !== null)
+    if (firstError) {
+      setError(firstError)
+      return
+    }
+
     setLoading(true)
     setError('')
 
@@ -308,8 +315,14 @@ export default function NewDocumentPage() {
               Voltar
             </button>
             <button
-              onClick={() => setStep('review')}
-              disabled={hasErrors}
+              onClick={() => {
+                if (hasErrors) {
+                  setError(signatoryErrors.find(e => e !== null) ?? 'Preencha todos os campos obrigatórios')
+                  return
+                }
+                setError('')
+                setStep('review')
+              }}
               className="flex-1 bg-blue-600 text-white py-2.5 rounded-lg font-medium text-sm hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               Revisar
