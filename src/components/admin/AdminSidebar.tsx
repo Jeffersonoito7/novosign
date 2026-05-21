@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Building2, Users, CreditCard, Package, LogOut, Shield } from 'lucide-react'
+import { LayoutDashboard, Building2, Users, CreditCard, Package, FileText, LogOut, Shield } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils'
 const nav = [
   { href: '/admin', label: 'Overview', icon: LayoutDashboard, exact: true },
   { href: '/admin/companies', label: 'Empresas', icon: Building2 },
+  { href: '/admin/documents', label: 'Documentos', icon: FileText },
   { href: '/admin/users', label: 'Usuários', icon: Users },
   { href: '/admin/credits', label: 'Créditos', icon: CreditCard },
   { href: '/admin/plans', label: 'Planos', icon: Package },

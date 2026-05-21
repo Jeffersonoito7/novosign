@@ -3,6 +3,7 @@
 @variant dark (&:where(.dark, .dark *));
 
 :root {
+  --logo-filter: none;
   --bg: #f9fafb;
   --bg-card: #ffffff;
   --bg-sidebar: #ffffff;
@@ -19,6 +20,7 @@
 }
 
 .dark {
+  --logo-filter: brightness(0) invert(1);
   --bg: #0f1117;
   --bg-card: #1a1d27;
   --bg-sidebar: #13151f;
