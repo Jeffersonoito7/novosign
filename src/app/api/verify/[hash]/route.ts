@@ -1,14 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
+
+function getAdmin() {
+  return createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+}
 
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ hash: string }> }
 ) {
   const { hash } = await params
-  const supabase = await createClient()
+  const supabase = getAdmin()
 
-  // Aceita tanto o hash do arquivo assinado quanto o ID do documento
   const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(hash)
 
   const query = supabase
@@ -25,7 +31,7 @@ export async function GET(
 
   const { data: signatories } = await supabase
     .from('signatories')
-    .select('name, email, cpf, status, signed_at, ip_address')
+    .select('name, email, cpf, status, signed_at, ip_address, user_agent, geolocation, notification_channel, signature_image_path')
     .eq('document_id', doc.id)
     .order('sign_order')
 
@@ -47,6 +53,9 @@ export async function GET(
       status: s.status,
       signed_at: s.signed_at,
       ip_address: s.ip_address,
+      user_agent: s.user_agent,
+      geolocation: s.geolocation,
+      notification_channel: s.notification_channel,
     })),
   })
 }

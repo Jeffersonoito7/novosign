@@ -31,11 +31,13 @@ export async function generateSignedPDF({
   document: doc,
   signatories,
   appUrl,
+  supabaseAdmin,
 }: {
   originalPdfBytes: Uint8Array
   document: Document
   signatories: Signatory[]
   appUrl: string
+  supabaseAdmin?: any
 }): Promise<{ pdfBytes: Uint8Array; hash: string }> {
   const pdfDoc = await PDFDocument.load(originalPdfBytes)
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica)
@@ -43,6 +45,22 @@ export async function generateSignedPDF({
 
   const verifyUrl = `${appUrl}/verify/${doc.id}`
   const signedSignatories = signatories.filter(s => s.status === 'signed')
+
+  // Pré-carregar imagens de assinatura
+  const signatureImages: Record<string, any> = {}
+  if (supabaseAdmin) {
+    for (const sig of signedSignatories) {
+      if ((sig as any).signature_image_path) {
+        try {
+          const { data } = await supabaseAdmin.storage.from('documents').download((sig as any).signature_image_path)
+          if (data) {
+            const bytes = new Uint8Array(await data.arrayBuffer())
+            signatureImages[sig.id] = await pdfDoc.embedPng(bytes)
+          }
+        } catch {}
+      }
+    }
+  }
 
   // ── Rodapé em TODAS as páginas ──────────────────────────────────────────
   const pages = pdfDoc.getPages()
@@ -109,7 +127,7 @@ export async function generateSignedPDF({
 
   // ── Página de certificado ─────────────────────────────────────────────────
   const certPage = pdfDoc.addPage([595, 842])
-  await buildCertificatePage({ page: certPage, doc, signatories, font, fontBold, appUrl, verifyUrl, pdfDoc })
+  await buildCertificatePage({ page: certPage, doc, signatories, font, fontBold, appUrl, verifyUrl, pdfDoc, signatureImages })
 
   const pdfBytes = await pdfDoc.save()
   const hash = sha256(Buffer.from(pdfBytes))
@@ -117,7 +135,7 @@ export async function generateSignedPDF({
 }
 
 async function buildCertificatePage({
-  page, doc, signatories, font, fontBold, appUrl, verifyUrl, pdfDoc,
+  page, doc, signatories, font, fontBold, appUrl, verifyUrl, pdfDoc, signatureImages,
 }: {
   page: PDFPage
   doc: Document
@@ -127,6 +145,7 @@ async function buildCertificatePage({
   appUrl: string
   verifyUrl: string
   pdfDoc: PDFDocument
+  signatureImages?: Record<string, any>
 }) {
   const { width, height } = page.getSize()
   const blue = rgb(0.15, 0.39, 0.94)
@@ -184,8 +203,26 @@ async function buildCertificatePage({
     if (isSigned && sig.signed_at) {
       page.drawText(safe(`Data/Hora: ${formatDate(sig.signed_at)} (UTC)`), { x: 32, y: y - 35, size: 7.5, font, color: gray })
       page.drawText(safe(`Endereco IP: ${sig.ip_address ?? 'N/I'}`), { x: 32, y: y - 46, size: 7, font, color: gray })
-      page.drawText(safe(`Dispositivo: ${(sig.user_agent ?? '').slice(0, 75)}`), { x: 32, y: y - 57, size: 6, font, color: rgb(0.5, 0.5, 0.5) })
-      page.drawText(safe(`Canal de verificacao: ${sig.notification_channel?.toUpperCase() ?? 'N/I'} (codigo OTP)`), { x: 32, y: y - 67, size: 6.5, font, color: gray })
+
+      const geo = (sig as any).geolocation
+      if (geo) {
+        const geoText = geo.city ? `${geo.city}, ${geo.country ?? ''}` : `Lat ${geo.lat?.toFixed(4)}, Lng ${geo.lng?.toFixed(4)}`
+        page.drawText(safe(`Localizacao: ${geoText}`), { x: 32, y: y - 57, size: 7, font, color: gray })
+        page.drawText(safe(`Dispositivo: ${(sig.user_agent ?? '').slice(0, 70)}`), { x: 32, y: y - 67, size: 6, font, color: rgb(0.5, 0.5, 0.5) })
+        page.drawText(safe(`Canal OTP: ${sig.notification_channel?.toUpperCase() ?? 'N/I'}`), { x: 32, y: y - 77, size: 6.5, font, color: gray })
+      } else {
+        page.drawText(safe(`Dispositivo: ${(sig.user_agent ?? '').slice(0, 70)}`), { x: 32, y: y - 57, size: 6, font, color: rgb(0.5, 0.5, 0.5) })
+        page.drawText(safe(`Canal OTP: ${sig.notification_channel?.toUpperCase() ?? 'N/I'}`), { x: 32, y: y - 67, size: 6.5, font, color: gray })
+      }
+
+      // Imagem da assinatura manuscrita
+      const sigImg = signatureImages?.[sig.id]
+      if (sigImg) {
+        const imgW = 100, imgH = 35
+        page.drawRectangle({ x: width - imgW - 35, y: y - boxH + 16, width: imgW, height: imgH, color: rgb(1,1,1), borderColor: rgb(0.8,0.8,0.8), borderWidth: 0.5 })
+        page.drawImage(sigImg, { x: width - imgW - 35, y: y - boxH + 16, width: imgW, height: imgH })
+        page.drawText('Assinatura', { x: width - imgW - 35, y: y - boxH + 12, size: 6, font, color: gray })
+      }
     }
 
     y -= boxH + 10

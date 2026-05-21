@@ -91,6 +91,7 @@ export async function POST(
           document: doc,
           signatories: updatedSignatories,
           appUrl,
+          supabaseAdmin: supabase,
         })
 
         const signedPath = `${doc.file_path.replace('.pdf', '')}_signed.pdf`
