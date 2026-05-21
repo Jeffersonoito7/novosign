@@ -38,15 +38,15 @@ export default function Sidebar({ user, credits }: { user: any; credits: number 
   const sidebarContent = (
     <>
       {/* Logo */}
-      <div className="px-3 py-3 border-b" style={{ borderColor: 'var(--border)' }}>
+      <div className="px-3 py-4 border-b flex flex-col items-center" style={{ borderColor: 'var(--border)' }}>
         <Image
           src="/novosign.png"
           alt="NovoSign"
-          width={100}
-          height={34}
-          style={{ objectFit: 'contain', objectPosition: 'left', filter: 'var(--logo-filter)' }}
+          width={110}
+          height={38}
+          style={{ objectFit: 'contain', filter: 'var(--logo-filter)' }}
         />
-        <p className="text-xs mt-1 truncate" style={{ color: 'var(--text-muted)' }}>
+        <p className="text-xs mt-1 truncate text-center" style={{ color: 'var(--text-muted)' }}>
           {user?.companies?.name ?? 'Minha Empresa'}
         </p>
       </div>
