@@ -79,7 +79,9 @@ export async function POST(
   if (allSigned) {
     // Gerar PDF assinado
     try {
-      const { data: fileData } = await supabase.storage.from('documents').download(doc.file_path)
+      console.log('[sign/complete] Iniciando geração do PDF. file_path:', doc.file_path)
+      const { data: fileData, error: dlError } = await supabase.storage.from('documents').download(doc.file_path)
+      if (dlError) console.error('[sign/complete] Erro no download:', dlError)
       if (fileData) {
         const originalBytes = new Uint8Array(await fileData.arrayBuffer())
         const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
@@ -155,8 +157,9 @@ export async function POST(
           }
         }
       }
-    } catch (err) {
-      console.error('Erro ao gerar PDF assinado:', err)
+    } catch (err: any) {
+      console.error('[sign/complete] Erro ao gerar PDF:', err?.message ?? err)
+      return NextResponse.json({ ok: true, allSigned, pdfError: err?.message ?? 'Erro ao gerar PDF' })
     }
   }
 
