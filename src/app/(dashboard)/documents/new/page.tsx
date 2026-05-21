@@ -266,15 +266,18 @@ export default function NewDocumentPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Canal de notificação</label>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                    Como enviar o código de verificação
+                    <span className="ml-1 text-blue-600 font-normal">(recomendado: E-mail)</span>
+                  </label>
                   <select
                     value={sig.notification_channel}
                     onChange={e => updateSignatory(i, 'notification_channel', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
                   >
-                    <option value="email">E-mail</option>
-                    <option value="whatsapp">WhatsApp</option>
-                    <option value="sms">SMS</option>
+                    <option value="email">📧 E-mail (maior validade jurídica)</option>
+                    <option value="whatsapp">💬 WhatsApp</option>
+                    <option value="sms">📱 SMS</option>
                   </select>
                 </div>
               </div>
