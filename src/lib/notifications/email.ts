@@ -114,23 +114,36 @@ export async function sendSignatureCompletedEmail({
   return getResend().emails.send({
     from: FROM,
     to,
-    subject: `Documento assinado — ${documentTitle}`,
+    subject: `Documento assinado com sucesso — ${documentTitle}`,
     html: `
-      <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px">
-        <h1 style="color:#2563eb">NovoSign</h1>
-        <div style="background:#d1fae5;border-radius:8px;padding:16px;margin-bottom:24px">
-          <p style="color:#065f46;font-weight:bold;margin:0">✅ Documento assinado com sucesso!</p>
+      <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;background:#ffffff">
+        <div style="margin-bottom:20px">
+          <span style="font-size:22px;font-weight:bold;color:#2563eb">Novo</span><span style="font-size:22px;font-weight:bold;color:#10b981">Sign</span>
         </div>
-        <p>Olá, ${name}!</p>
-        <p>O documento <strong>${documentTitle}</strong> foi assinado por todos os assinantes.</p>
-        <div style="text-align:center;margin:24px 0;display:flex;gap:16px;justify-content:center">
-          <a href="${downloadUrl}" style="background:#2563eb;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold">
-            Baixar PDF Assinado
-          </a>
-          <a href="${verifyUrl}" style="background:#f3f4f6;color:#374151;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold">
-            Verificar Autenticidade
-          </a>
+        <div style="background:#d1fae5;border-radius:8px;padding:14px 16px;margin-bottom:20px">
+          <p style="color:#065f46;font-weight:bold;margin:0;font-size:15px">Documento assinado com sucesso!</p>
         </div>
+        <p style="font-size:15px;color:#111827">Olá, <strong>${name}</strong>!</p>
+        <p style="font-size:15px;color:#374151">O documento <strong>"${documentTitle}"</strong> foi assinado por todos os assinantes e está pronto para download.</p>
+        <table width="100%" cellpadding="0" cellspacing="0" style="margin:28px 0">
+          <tr>
+            <td align="center">
+              <a href="${downloadUrl}" style="display:inline-block;background:#2563eb;color:#ffffff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:15px;margin-bottom:12px">
+                Baixar PDF Assinado
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding-top:8px">
+              <a href="${verifyUrl}" style="display:inline-block;background:#f3f4f6;color:#374151;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:14px">
+                Verificar Autenticidade
+              </a>
+            </td>
+          </tr>
+        </table>
+        <p style="font-size:12px;color:#9ca3af;border-top:1px solid #e5e7eb;padding-top:16px;margin-top:8px">
+          NovoSign · Assinatura Eletrônica com Validade Jurídica · Lei 14.063/2020
+        </p>
       </div>
     `,
   })

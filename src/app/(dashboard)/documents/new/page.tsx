@@ -257,13 +257,20 @@ export default function NewDocumentPage() {
                   )}
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Telefone / WhatsApp <span className="text-gray-400">(opcional)</span></label>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                    Telefone / WhatsApp
+                    {sig.notification_channel === 'whatsapp' && <span className="text-red-500 ml-1">*</span>}
+                    {sig.notification_channel !== 'whatsapp' && <span className="text-gray-400 ml-1">(opcional)</span>}
+                  </label>
                   <input
                     value={sig.phone}
                     onChange={e => updateSignatory(i, 'phone', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${sig.notification_channel === 'whatsapp' && !sig.phone.trim() ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
                     placeholder="(87) 99999-9999"
                   />
+                  {sig.notification_channel === 'whatsapp' && !sig.phone.trim() && (
+                    <p className="text-red-500 text-xs mt-0.5">WhatsApp obrigatório quando esse canal é selecionado</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-600 mb-1">
